@@ -104,15 +104,15 @@ export default function Header() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Brand Logo - Rendered consistently with zero flash */}
+            {/* Brand Logo - Enlarged and clear */}
             <Link href="/" className="flex items-center shrink-0 group py-0.5">
               <div className="relative flex items-center">
                 <Image
                   src={logoSrc}
                   alt={settings.storeName || 'JAVED SHOP'}
-                  width={200}
-                  height={48}
-                  className="h-8 sm:h-10 w-auto object-contain group-hover:opacity-95 transition"
+                  width={280}
+                  height={68}
+                  className="h-9 sm:h-11 md:h-13 lg:h-14 w-auto object-contain group-hover:opacity-95 transition"
                   priority
                 />
               </div>
