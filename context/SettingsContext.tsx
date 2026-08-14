@@ -19,9 +19,9 @@ export interface SiteSettings {
 
 const DEFAULT_SETTINGS: SiteSettings = {
   storeName: 'JAVED SHOP',
-  tagline: 'China Gadget Store in Bangladesh',
-  logo: '',
-  favicon: '',
+  tagline: 'MORE THAN JUST A SHOP',
+  logo: '/javed-shop-logo.png',
+  favicon: '/javed-shop-icon.png',
   email: 'support@javedshop.com',
   hotline: '+880 1700-000000',
   whatsapp: '+880 1700-000000',
@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   facebookUrl: 'https://facebook.com/javedshopbd',
   instagramUrl: 'https://instagram.com/javedshopbd',
   youtubeUrl: 'https://youtube.com/@javedshopbd',
-  clearanceNotice: 'Mega Clearance Up To 60% Off!',
+  clearanceNotice: 'Smart Products. Better Everyday. | Nationwide Delivery',
 };
 
 interface SettingsContextType {

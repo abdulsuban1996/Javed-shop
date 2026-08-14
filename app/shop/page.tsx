@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductCard, { Product } from '../../components/product/ProductCard';
-import { Filter, ArrowUpDown, RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { Filter, ArrowUpDown, RefreshCw, SlidersHorizontal, Layers } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
 
 const INITIAL_PRODUCTS: Product[] = [
@@ -50,91 +50,106 @@ function ShopContent() {
   else if (sortBy === 'price-high') filtered.sort((a, b) => (b.discount_price || b.price) - (a.discount_price || a.price));
   else if (sortBy === 'rating') filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
-  const pageTitle = search ? `Results for "${search}"` : dealParam ? 'Deals of the Day' : flashParam ? 'Flash Sale' : 'All Products';
+  const pageTitle = search ? `Search Results for "${search}"` : dealParam ? 'Deals of the Day' : flashParam ? 'Flash Sale Offers' : 'All Products';
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">{pageTitle}</h1>
-        <p className="text-xs text-slate-500 mt-1">Showing {filtered.length} China imported gadgets available in Bangladesh</p>
+      <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-1 text-[#2563EB]">
+          <Layers className="w-4 h-4" />
+          <span className="text-xs font-bold uppercase tracking-wider">Product Catalog</span>
+        </div>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-[#0B1220] tracking-tight">{pageTitle}</h1>
+        <p className="text-xs text-slate-500 mt-1">Showing {filtered.length} products available for nationwide delivery</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
         {/* Filter Sidebar */}
         <div className="lg:col-span-3">
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm sticky top-24">
-            {/* Sidebar header */}
-            <div className="flex items-center gap-2 px-4 py-3 bg-purple-600 text-white">
-              <Filter className="w-4 h-4" />
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm sticky top-24">
+            
+            {/* Sidebar Header */}
+            <div className="flex items-center gap-2 px-4 py-3 bg-[#0B1220] text-white">
+              <Filter className="w-4 h-4 text-[#2563EB]" />
               <span className="font-bold text-sm">Filter Products</span>
             </div>
 
             <div className="p-4 space-y-5">
-              {/* Price Range */}
+              
+              {/* Price Filter */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-700 flex justify-between">
-                  <span>Max Price</span>
-                  <span className="text-purple-600 font-extrabold">৳{maxPrice.toLocaleString()}</span>
+                  <span>Price Range</span>
+                  <span className="text-[#2563EB] font-extrabold">Up to ৳{maxPrice.toLocaleString()}</span>
                 </label>
                 <input
-                  type="range" min="500" max="5000" step="100"
+                  type="range"
+                  min="500"
+                  max="5000"
+                  step="100"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  className="w-full accent-purple-600 cursor-pointer"
+                  className="w-full accent-[#2563EB] cursor-pointer"
                 />
-                <div className="flex justify-between text-[10px] text-slate-400 font-medium">
+                <div className="flex justify-between text-[11px] text-slate-400 font-medium">
                   <span>৳500</span><span>৳5,000</span>
                 </div>
               </div>
 
               {/* Offer Type */}
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-700">Offer Type</h4>
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <h4 className="text-xs font-bold text-slate-700">Special Offers</h4>
                 <div className="space-y-2 text-xs text-slate-600">
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-purple-600">
-                    <input type="checkbox" defaultChecked={dealParam} className="rounded accent-purple-600" />
+                  <label className="flex items-center gap-2 cursor-pointer hover:text-[#2563EB]">
+                    <input type="checkbox" defaultChecked={dealParam} className="rounded accent-[#2563EB]" />
                     <span>Deals of the Day</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-purple-600">
-                    <input type="checkbox" defaultChecked={flashParam} className="rounded accent-purple-600" />
+                  <label className="flex items-center gap-2 cursor-pointer hover:text-[#2563EB]">
+                    <input type="checkbox" defaultChecked={flashParam} className="rounded accent-[#2563EB]" />
                     <span>Flash Sale</span>
                   </label>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
 
-        {/* Product Grid */}
+        {/* Catalog Main Column */}
         <div className="lg:col-span-9 space-y-4">
-          {/* Sort Bar */}
-          <div className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-sm">
+          
+          {/* Controls Bar */}
+          <div className="bg-white border border-[#E5E7EB] rounded-xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-sm">
             <div className="flex items-center gap-1.5 text-slate-500">
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Found <strong className="text-slate-800">{filtered.length}</strong> items</span>
+              <span>Found <strong className="text-[#0B1220] font-bold">{filtered.length}</strong> products</span>
             </div>
+
             <div className="flex items-center gap-2">
-              <ArrowUpDown className="w-3.5 h-3.5 text-purple-500" />
-              <span className="text-slate-500">Sort:</span>
+              <ArrowUpDown className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span className="text-slate-500 font-medium">Sort By:</span>
               <select
                 value={sortBy}
                 onChange={(e: any) => setSortBy(e.target.value)}
-                className="bg-white text-slate-800 rounded-lg px-2.5 py-1.5 border border-slate-200 focus:outline-none focus:border-purple-500 text-xs"
+                className="bg-[#F8FAFC] text-[#0B1220] font-medium rounded-lg px-2.5 py-1.5 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] text-xs cursor-pointer"
               >
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low → High</option>
-                <option value="price-high">Price: High → Low</option>
+                <option value="featured">Featured / Default</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
                 <option value="rating">Highest Rated</option>
               </select>
             </div>
           </div>
 
+          {/* Product Grid */}
           {filtered.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-12 text-center space-y-3">
-              <RefreshCw className="w-8 h-8 text-purple-500 mx-auto" />
-              <p className="font-bold text-slate-800">No products found.</p>
-              <p className="text-xs text-slate-500">Try adjusting the price range or clearing search keywords.</p>
+            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-12 text-center space-y-3">
+              <RefreshCw className="w-8 h-8 text-[#2563EB] mx-auto animate-spin" />
+              <p className="font-bold text-[#0B1220]">No products found matching your filters.</p>
+              <p className="text-xs text-slate-500">Try adjusting your price range or clearing keyword filters.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
@@ -143,7 +158,9 @@ function ShopContent() {
               ))}
             </div>
           )}
+
         </div>
+
       </div>
     </div>
   );
@@ -153,8 +170,8 @@ export default function ShopPage() {
   return (
     <Suspense fallback={
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <RefreshCw className="w-8 h-8 text-purple-500 mx-auto animate-spin" />
-        <p className="mt-2 text-sm font-bold text-slate-700">Loading Catalog...</p>
+        <RefreshCw className="w-8 h-8 text-[#2563EB] mx-auto animate-spin" />
+        <p className="mt-2 text-sm font-bold text-[#0B1220]">Loading Catalog...</p>
       </div>
     }>
       <ShopContent />
