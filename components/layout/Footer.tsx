@@ -31,8 +31,8 @@ export default function Footer() {
     <footer className="w-full bg-slate-950 text-slate-400 mt-12">
       
       {/* ── Top Feature Strip ── */}
-      <div className="border-b border-slate-800/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div className="border-b border-slate-800/60 hidden md:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon: Truck,     color: 'text-purple-400', bg: 'bg-purple-500/10', title: 'Nationwide Delivery', sub: 'Inside & Outside Dhaka' },
@@ -55,11 +55,11 @@ export default function Footer() {
       </div>
 
       {/* ── Main Footer Grid ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
 
           {/* Col 1 — Brand */}
-          <div className="space-y-5">
+          <div className="space-y-3">
             <Link href="/" className="flex items-center gap-2.5 group">
               {settings.logo ? (
                 <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-purple-600/40 shadow-md">
@@ -107,11 +107,9 @@ export default function Footer() {
           </div>
 
           {/* Col 2 — Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-black text-white uppercase tracking-widest">
-              Quick Links
-            </h3>
-            <ul className="space-y-2.5">
+          <div className="space-y-3">
+            <h3 className="text-xs font-black text-white uppercase tracking-widest">Quick Links</h3>
+            <ul className="space-y-2">
               {quickLinks.map(({ label, href }) => (
                 <li key={href}>
                   <Link
@@ -127,11 +125,9 @@ export default function Footer() {
           </div>
 
           {/* Col 3 — Customer Support */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-black text-white uppercase tracking-widest">
-              Customer Support
-            </h3>
-            <ul className="space-y-3">
+          <div className="space-y-3">
+            <h3 className="text-xs font-black text-white uppercase tracking-widest">Customer Support</h3>
+            <ul className="space-y-2.5">
               <li className="flex items-start gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
                   <Phone className="w-3.5 h-3.5 text-orange-500" />
@@ -171,7 +167,7 @@ export default function Footer() {
 
       {/* ── Bottom Bar ── */}
       <div className="border-t border-slate-800/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-slate-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-slate-600">
           <p>© {year} <span className="text-slate-400 font-semibold">{settings.storeName || 'Javed Shop'}</span>. All rights reserved.</p>
           <p className="flex items-center gap-1">
             Direct China Import · 
