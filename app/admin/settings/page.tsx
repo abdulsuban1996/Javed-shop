@@ -21,15 +21,15 @@ export default function AdminSettingsPage() {
 
   // Store Identity
   const [storeName, setStoreName] = useState(settings.storeName || 'JAVED SHOP');
-  const [tagline, setTagline] = useState(settings.tagline || 'China Gadget Online Shop in Bangladesh');
-  const [logos, setLogos] = useState<string[]>(settings.logo ? [settings.logo] : []);
-  const [favicons, setFavicons] = useState<string[]>(settings.favicon ? [settings.favicon] : []);
+  const [tagline, setTagline] = useState(settings.tagline || 'MORE THAN JUST A SHOP');
+  const [logos, setLogos] = useState<string[]>(settings.logo ? [settings.logo] : ['/javed-shop-logo.png']);
+  const [favicons, setFavicons] = useState<string[]>(settings.favicon ? [settings.favicon] : ['/javed-shop-icon.png']);
 
   // Contact Info
   const [email, setEmail] = useState(settings.email || 'support@javedshop.com');
   const [hotline, setHotline] = useState(settings.hotline || '+880 1700-000000');
   const [whatsapp, setWhatsapp] = useState(settings.whatsapp || '+880 1700-000000');
-  const [address, setAddress] = useState(settings.address || 'House 14, Road 7, Uttara Sector 3, Dhaka, Bangladesh');
+  const [address, setAddress] = useState(settings.address || 'Dhaka, Bangladesh');
 
   // Social Links
   const [facebookUrl, setFacebookUrl] = useState(settings.facebookUrl || 'https://facebook.com/javedshopbd');
@@ -37,7 +37,7 @@ export default function AdminSettingsPage() {
   const [youtubeUrl, setYoutubeUrl] = useState(settings.youtubeUrl || 'https://youtube.com/@javedshopbd');
 
   // Top Announcement Ticker
-  const [clearanceNotice, setClearanceNotice] = useState(settings.clearanceNotice || 'Mega Clearance Up To 60% Off!');
+  const [clearanceNotice, setClearanceNotice] = useState(settings.clearanceNotice || 'Smart Products. Better Everyday. | Nationwide Delivery');
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -45,17 +45,17 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     if (settings) {
       setStoreName(settings.storeName || 'JAVED SHOP');
-      setTagline(settings.tagline || 'China Gadget Online Shop in Bangladesh');
-      if (settings.logo) setLogos([settings.logo]);
-      if (settings.favicon) setFavicons([settings.favicon]);
+      setTagline(settings.tagline || 'MORE THAN JUST A SHOP');
+      setLogos([settings.logo || '/javed-shop-logo.png']);
+      setFavicons([settings.favicon || '/javed-shop-icon.png']);
       setEmail(settings.email || 'support@javedshop.com');
       setHotline(settings.hotline || '+880 1700-000000');
       setWhatsapp(settings.whatsapp || '+880 1700-000000');
       setAddress(settings.address || 'Dhaka, Bangladesh');
-      setFacebookUrl(settings.facebookUrl || '');
-      setInstagramUrl(settings.instagramUrl || '');
-      setYoutubeUrl(settings.youtubeUrl || '');
-      setClearanceNotice(settings.clearanceNotice || 'Mega Clearance Up To 60% Off!');
+      setFacebookUrl(settings.facebookUrl || 'https://facebook.com/javedshopbd');
+      setInstagramUrl(settings.instagramUrl || 'https://instagram.com/javedshopbd');
+      setYoutubeUrl(settings.youtubeUrl || 'https://youtube.com/@javedshopbd');
+      setClearanceNotice(settings.clearanceNotice || 'Smart Products. Better Everyday. | Nationwide Delivery');
     }
   }, [settings]);
 
@@ -67,8 +67,8 @@ export default function AdminSettingsPage() {
     updateSettings({
       storeName,
       tagline,
-      logo: logos[0] || '',
-      favicon: favicons[0] || '',
+      logo: logos[0] || '/javed-shop-logo.png',
+      favicon: favicons[0] || '/javed-shop-icon.png',
       email,
       hotline,
       whatsapp,
@@ -90,10 +90,10 @@ export default function AdminSettingsPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-b border-[#E5E7EB] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-            <Settings className="w-7 h-7 text-purple-600" />
+          <h1 className="text-2xl font-extrabold text-[#0B1220] flex items-center gap-2">
+            <Settings className="w-7 h-7 text-[#2563EB]" />
             <span>Site Identity & Settings</span>
           </h1>
           <p className="text-xs text-slate-500 font-medium">Manage Logo, Favicon, Contact Info, Social Links & Announcements</p>
@@ -102,7 +102,7 @@ export default function AdminSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs hover:brightness-110 transition shadow-md shadow-purple-500/25 flex items-center gap-2 self-start sm:self-auto"
+          className="px-5 py-2.5 rounded-xl bg-[#2563EB] text-white font-bold text-xs hover:bg-[#1D4ED8] transition shadow-sm flex items-center gap-2 self-start sm:self-auto"
         >
           <Save className="w-4 h-4" />
           <span>{saving ? 'Saving...' : 'Save & Publish Live'}</span>
@@ -115,7 +115,7 @@ export default function AdminSettingsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 shadow-sm"
         >
-          <Check className="w-5 h-5 text-emerald-600" />
+          <Check className="w-5 h-5 text-[#25C55E]" />
           <span>Website updated live across all pages & browser sessions!</span>
         </motion.div>
       )}
@@ -123,9 +123,9 @@ export default function AdminSettingsPage() {
       <form onSubmit={handleSave} className="space-y-6">
         
         {/* Section 1: Store Identity & Branding */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl shadow-slate-200/60 border border-slate-100">
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Store className="w-5 h-5 text-purple-600" />
+        <div className="bg-white rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm border border-[#E5E7EB]">
+          <h2 className="text-base font-extrabold text-[#0B1220] uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
+            <Store className="w-5 h-5 text-[#2563EB]" />
             <span>Store Identity & Branding</span>
           </h2>
 
@@ -138,7 +138,7 @@ export default function AdminSettingsPage() {
                   required
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
-                  className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                  className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
                 />
               </div>
 
@@ -148,7 +148,7 @@ export default function AdminSettingsPage() {
                   type="text"
                   value={tagline}
                   onChange={(e) => setTagline(e.target.value)}
-                  className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                  className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
                 />
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function AdminSettingsPage() {
                 value={logos}
                 onChange={setLogos}
                 multiple={false}
-                label="Upload Store Brand Logo (ImageKit Cloud)"
+                label="Upload Store Brand Logo"
               />
             </div>
 
@@ -169,23 +169,23 @@ export default function AdminSettingsPage() {
                 value={favicons}
                 onChange={setFavicons}
                 multiple={false}
-                label="Upload Website Favicon Icon (.ico, .png)"
+                label="Upload Website Favicon Icon"
               />
             </div>
           </div>
         </div>
 
         {/* Section 2: Contact Info & Support */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl shadow-slate-200/60 border border-slate-100">
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Phone className="w-5 h-5 text-emerald-600" />
+        <div className="bg-white rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm border border-[#E5E7EB]">
+          <h2 className="text-base font-extrabold text-[#0B1220] uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
+            <Phone className="w-5 h-5 text-[#25C55E]" />
             <span>Customer Support & Contact Info</span>
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div className="space-y-1">
               <label className="font-bold text-slate-700 flex items-center gap-1">
-                <Mail className="w-4 h-4 text-purple-600" />
+                <Mail className="w-4 h-4 text-[#2563EB]" />
                 <span>Support Email Address</span>
               </label>
               <input
@@ -194,13 +194,13 @@ export default function AdminSettingsPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="support@javedshop.com"
-                className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
               />
             </div>
 
             <div className="space-y-1">
               <label className="font-bold text-slate-700 flex items-center gap-1">
-                <Phone className="w-4 h-4 text-purple-600" />
+                <Phone className="w-4 h-4 text-[#2563EB]" />
                 <span>Hotline Phone Number</span>
               </label>
               <input
@@ -209,13 +209,13 @@ export default function AdminSettingsPage() {
                 value={hotline}
                 onChange={(e) => setHotline(e.target.value)}
                 placeholder="+880 1700-000000"
-                className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
               />
             </div>
 
             <div className="space-y-1">
               <label className="font-bold text-slate-700 flex items-center gap-1">
-                <Phone className="w-4 h-4 text-emerald-600" />
+                <Phone className="w-4 h-4 text-[#25C55E]" />
                 <span>WhatsApp Business Number</span>
               </label>
               <input
@@ -223,7 +223,7 @@ export default function AdminSettingsPage() {
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
                 placeholder="+880 1700-000000"
-                className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
               />
             </div>
 
@@ -237,16 +237,16 @@ export default function AdminSettingsPage() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Dhaka, Bangladesh"
-                className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Section 3: Social Media Links */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl shadow-slate-200/60 border border-slate-100">
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Share2 className="w-5 h-5 text-blue-600" />
+        <div className="bg-white rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm border border-[#E5E7EB]">
+          <h2 className="text-base font-extrabold text-[#0B1220] uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
+            <Share2 className="w-5 h-5 text-[#2563EB]" />
             <span>Social Media Handles</span>
           </h2>
 
@@ -258,7 +258,7 @@ export default function AdminSettingsPage() {
                 value={facebookUrl}
                 onChange={(e) => setFacebookUrl(e.target.value)}
                 placeholder="https://facebook.com/javedshopbd"
-                className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
               />
             </div>
 
@@ -270,7 +270,7 @@ export default function AdminSettingsPage() {
                   value={instagramUrl}
                   onChange={(e) => setInstagramUrl(e.target.value)}
                   placeholder="https://instagram.com/javedshopbd"
-                  className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                  className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
                 />
               </div>
 
@@ -281,7 +281,7 @@ export default function AdminSettingsPage() {
                   value={youtubeUrl}
                   onChange={(e) => setYoutubeUrl(e.target.value)}
                   placeholder="https://youtube.com/@javedshopbd"
-                  className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+                  className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
                 />
               </div>
             </div>
@@ -289,9 +289,9 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Section 4: Storefront Top Announcement Ticker */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl shadow-slate-200/60 border border-slate-100">
-          <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Megaphone className="w-5 h-5 text-amber-500" />
+        <div className="bg-white rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm border border-[#E5E7EB]">
+          <h2 className="text-base font-extrabold text-[#0B1220] uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-3">
+            <Megaphone className="w-5 h-5 text-[#2563EB]" />
             <span>Storefront Top Announcement Bar</span>
           </h2>
 
@@ -301,8 +301,8 @@ export default function AdminSettingsPage() {
               type="text"
               value={clearanceNotice}
               onChange={(e) => setClearanceNotice(e.target.value)}
-              placeholder="e.g. Mega Clearance Up To 60% Off! Direct Import China Gadgets"
-              className="w-full bg-slate-50 text-slate-900 rounded-xl p-3 border border-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white transition"
+              placeholder="e.g. Smart Products. Better Everyday. | Nationwide Delivery"
+              className="w-full bg-[#F8FAFC] text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:bg-white transition text-xs sm:text-sm"
             />
           </div>
         </div>
@@ -311,7 +311,7 @@ export default function AdminSettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white font-extrabold text-sm hover:brightness-110 transition shadow-xl shadow-purple-500/25 active:scale-98"
+          className="w-full py-4 rounded-xl bg-[#2563EB] text-white font-bold text-sm hover:bg-[#1D4ED8] transition shadow-sm"
         >
           {saving ? 'Publishing Live Updates...' : 'Save & Publish Live Updates'}
         </button>

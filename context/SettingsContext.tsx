@@ -51,6 +51,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
+          // Ensure valid logo and favicon paths are retained
+          if (!parsed.logo || typeof parsed.logo !== 'string' || parsed.logo.trim() === '') {
+            parsed.logo = '/javed-shop-logo.png';
+          }
+          if (!parsed.favicon || typeof parsed.favicon !== 'string' || parsed.favicon.trim() === '') {
+            parsed.favicon = '/javed-shop-icon.png';
+          }
           setSettings((prev) => ({ ...prev, ...parsed }));
         } catch (e) {
           console.error('Error parsing settings:', e);
@@ -61,7 +68,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         const updated = localStorage.getItem('javed_shop_settings');
         if (updated) {
           try {
-            setSettings((prev) => ({ ...prev, ...JSON.parse(updated) }));
+            const parsed = JSON.parse(updated);
+            if (!parsed.logo || typeof parsed.logo !== 'string' || parsed.logo.trim() === '') {
+              parsed.logo = '/javed-shop-logo.png';
+            }
+            if (!parsed.favicon || typeof parsed.favicon !== 'string' || parsed.favicon.trim() === '') {
+              parsed.favicon = '/javed-shop-icon.png';
+            }
+            setSettings((prev) => ({ ...prev, ...parsed }));
           } catch (e) {}
         }
       };
@@ -79,6 +93,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const updateSettings = (newSettings: Partial<SiteSettings>) => {
     setSettings((prev) => {
       const updated = { ...prev, ...newSettings };
+      if (!updated.logo || updated.logo.trim() === '') {
+        updated.logo = '/javed-shop-logo.png';
+      }
       if (typeof window !== 'undefined') {
         localStorage.setItem('javed_shop_settings', JSON.stringify(updated));
         window.dispatchEvent(new Event('javed_settings_updated'));

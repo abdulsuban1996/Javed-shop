@@ -38,6 +38,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${anekBangla.variable}`}>
+      <head>
+        <link rel="preload" href="/javed-shop-logo.png" as="image" />
+      </head>
       <body className="bg-[#F8FAFC] text-[#111827] font-sans min-h-screen flex flex-col justify-between antialiased">
         <SettingsProvider>
           <CartProvider>

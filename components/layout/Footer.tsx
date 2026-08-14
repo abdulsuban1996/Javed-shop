@@ -27,11 +27,13 @@ export default function Footer() {
     { label: 'Contact Support', href: '/contact' },
   ];
 
+  const logoSrc = settings.logo && settings.logo.trim() !== '' ? settings.logo : '/javed-shop-logo.png';
+
   return (
     <footer className="w-full bg-[#0B1220] text-slate-300 mt-12 border-t border-slate-800">
       
       {/* ── Top Feature Strip ── */}
-      <div className="border-b border-slate-800/80">
+      <div className="border-b border-slate-800/80 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
@@ -60,13 +62,14 @@ export default function Footer() {
 
           {/* Col 1 — Brand */}
           <div className="space-y-3.5">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="relative h-9 w-44 bg-white/95 p-1.5 rounded-lg">
+            <Link href="/" className="inline-block group">
+              <div className="bg-white px-3 py-1.5 rounded-xl inline-flex items-center shadow-sm">
                 <Image
-                  src={settings.logo || '/javed-shop-logo.png'}
+                  src={logoSrc}
                   alt={settings.storeName || 'JAVED SHOP'}
-                  fill
-                  className="object-contain object-left px-2"
+                  width={180}
+                  height={40}
+                  className="h-7 sm:h-8 w-auto object-contain"
                 />
               </div>
             </Link>

@@ -19,9 +19,7 @@ import {
   BookOpen,
   Phone,
   ChevronRight,
-  Truck,
   User,
-  Heart,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -54,6 +52,8 @@ export default function Header() {
     { name: 'Blog & Reviews', href: '/blog', icon: BookOpen },
     { name: 'Contact Us', href: '/contact', icon: Phone },
   ];
+
+  const logoSrc = settings.logo && settings.logo.trim() !== '' ? settings.logo : '/javed-shop-logo.png';
 
   return (
     <header className="w-full sticky top-0 z-50 shadow-sm">
@@ -104,38 +104,18 @@ export default function Header() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-              {settings.logo ? (
-                <div className="relative h-9 sm:h-11 w-36 sm:w-48">
-                  <Image
-                    src={settings.logo}
-                    alt={settings.storeName || 'JAVED SHOP'}
-                    fill
-                    className="object-contain object-left group-hover:opacity-95 transition"
-                    priority
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm">
-                    <Image
-                      src="/javed-shop-icon.png"
-                      alt="Javed Shop Icon"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-extrabold text-xl tracking-tight text-[#0B1220]">
-                      JAVED
-                    </span>
-                    <span className="font-extrabold text-xl tracking-tight text-[#25C55E]">
-                      SHOP
-                    </span>
-                  </div>
-                </div>
-              )}
+            {/* Brand Logo - Rendered consistently with zero flash */}
+            <Link href="/" className="flex items-center shrink-0 group py-0.5">
+              <div className="relative flex items-center">
+                <Image
+                  src={logoSrc}
+                  alt={settings.storeName || 'JAVED SHOP'}
+                  width={200}
+                  height={48}
+                  className="h-8 sm:h-10 w-auto object-contain group-hover:opacity-95 transition"
+                  priority
+                />
+              </div>
             </Link>
 
             {/* Desktop Search Bar */}
