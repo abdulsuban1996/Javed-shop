@@ -41,30 +41,30 @@ export default function DealsOfTheDay({ products }: { products: Product[] }) {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl backdrop-blur-md"
+        className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
       >
         <div className="flex items-center gap-3">
           <motion.div
             animate={{ rotate: [0, 10, -10, 0] }}
             transition={{ repeat: Infinity, duration: 4 }}
-            className="w-10 h-10 rounded-2xl bg-accent-orange/20 border border-accent-orange/40 flex items-center justify-center text-accent-orange shadow-md"
+            className="w-10 h-10 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 shadow-sm"
           >
             <Tag className="w-5 h-5" />
           </motion.div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight">
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tight">
                 Deals of the Day
               </h2>
               <motion.span
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
-                className="bg-accent-orange text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase shadow-md"
+                className="bg-accent-orange text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase shadow-sm"
               >
                 Hot Offer
               </motion.span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Limited quantity gadget deals imported directly from China
             </p>
           </div>
@@ -72,7 +72,7 @@ export default function DealsOfTheDay({ products }: { products: Product[] }) {
 
         <Link
           href="/shop?deal=true"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-accent-amber hover:text-accent-orange transition group"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-orange-600 hover:text-orange-700 transition group"
         >
           <span>View All Deals</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />

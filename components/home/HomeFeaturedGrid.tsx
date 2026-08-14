@@ -34,10 +34,10 @@ export default function HomeFeaturedGrid({ products }: { products: Product[] }) 
     >
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">
             Featured China Gadgets
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Browse top picks, trending wearables & mobile gear
           </p>
         </div>

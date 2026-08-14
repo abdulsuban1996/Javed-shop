@@ -36,8 +36,8 @@ function CategoryContent() {
           href="/shop"
           className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 border transition ${
             !activeCategory
-              ? 'bg-accent-orange text-slate-950 border-accent-orange shadow-md'
-              : 'bg-slate-900 text-slate-300 border-slate-800 hover:text-white'
+              ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+              : 'bg-white text-slate-700 border-slate-200 hover:text-slate-900'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -54,8 +54,8 @@ function CategoryContent() {
               href={`/shop?category=${cat.id}`}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shrink-0 border transition ${
                 isActive
-                  ? 'bg-accent-orange text-slate-950 border-accent-orange shadow-md'
-                  : 'bg-slate-900 text-slate-300 border-slate-800 hover:text-white'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                  : 'bg-white text-slate-700 border-slate-200 hover:text-slate-900'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -66,17 +66,17 @@ function CategoryContent() {
       </div>
 
       {/* Desktop Vertical Sidebar */}
-      <div className="hidden lg:block bg-slate-900/90 border border-slate-800/80 rounded-3xl p-4 shadow-xl backdrop-blur-md">
+      <div className="hidden lg:block bg-white border border-slate-200 rounded-3xl p-4 shadow-sm">
         
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800 px-2">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 px-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-accent-orange animate-ping"></div>
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-200">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">
               Top Categories
             </h2>
           </div>
-          <span className="text-[10px] text-accent-amber font-extrabold bg-accent-amber/10 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] text-orange-600 font-extrabold bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
             Direct Import
           </span>
         </div>
@@ -98,25 +98,25 @@ function CategoryContent() {
                   transition={{ duration: 0.2 }}
                   className={`flex items-center justify-between p-2.5 rounded-2xl transition duration-200 ${
                     isActive
-                      ? 'bg-brand-900 text-white font-bold border border-brand-600/40 shadow-md'
-                      : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                      ? 'bg-slate-900 text-white font-bold shadow-md'
+                      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-xl bg-gradient-to-tr ${cat.color} flex items-center justify-center text-white shadow-md group-hover:scale-110 transition transform`}>
+                    <div className={`w-8 h-8 rounded-xl bg-gradient-to-tr ${cat.color} flex items-center justify-center text-white shadow-sm group-hover:scale-110 transition transform`}>
                       <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold group-hover:text-accent-amber transition">
+                      <span className="text-xs font-bold group-hover:text-orange-600 transition">
                         {cat.name}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-medium">
+                      <span className="text-[10px] text-slate-500 font-medium">
                         {cat.count}
                       </span>
                     </div>
                   </div>
 
-                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-accent-orange group-hover:translate-x-1 transition transform" />
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-orange-600 group-hover:translate-x-1 transition transform" />
                 </motion.div>
               </Link>
             );
@@ -131,7 +131,7 @@ function CategoryContent() {
 export default function CategorySidebar() {
   return (
     <Suspense fallback={
-      <div className="w-full h-12 bg-slate-900 rounded-2xl animate-pulse"></div>
+      <div className="w-full h-12 bg-slate-100 rounded-2xl animate-pulse"></div>
     }>
       <CategoryContent />
     </Suspense>

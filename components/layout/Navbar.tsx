@@ -24,7 +24,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="w-full bg-slate-900 border-b border-slate-800/80 text-sm hidden md:block">
+    <nav className="w-full bg-slate-100/80 border-b border-slate-200 text-sm hidden md:block backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-11">
           
@@ -37,13 +37,13 @@ export default function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition text-xs ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition text-xs ${
                     isActive
-                      ? 'bg-brand-900 text-white font-semibold'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/80'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${link.badge ? 'text-accent-orange animate-pulse' : 'text-slate-400'}`} />
+                  <Icon className={`w-3.5 h-3.5 ${link.badge ? 'text-orange-600 animate-pulse' : 'text-slate-500'}`} />
                   <span>{link.name}</span>
                   {link.badge && (
                     <span className="bg-accent-orange text-slate-950 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">
@@ -55,8 +55,8 @@ export default function Navbar() {
             })}
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-900 bg-amber-500/15 border border-amber-500/30 px-3 py-1 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
             <span>{settings.clearanceNotice || 'Mega Clearance Up To 60% Off!'}</span>
           </div>
 
