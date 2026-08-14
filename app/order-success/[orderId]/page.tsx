@@ -2,73 +2,100 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ShieldCheck, PhoneCall, ShoppingBag, ArrowRight, Clock } from 'lucide-react';
+import { CheckCircle2, PhoneCall, ShoppingBag, ArrowRight, Clock, Truck } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function OrderSuccessPage({ params }: { params: { orderId: string } }) {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-8">
-      
-      {/* Animated Success Badge */}
-      <div className="w-20 h-20 rounded-full bg-emerald-950 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-400 shadow-2xl animate-bounce">
-        <CheckCircle2 className="w-10 h-10" />
-      </div>
+    <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-8">
 
-      <div className="space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-          Thank You! Order Placed Successfully
+      {/* Success Icon */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 12 }}
+        className="w-20 h-20 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center mx-auto shadow-md"
+      >
+        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+      </motion.div>
+
+      {/* Title */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="space-y-2"
+      >
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">
+          Order Placed Successfully! 🎉
         </h1>
-        <p className="text-sm text-slate-400">
-          Your order number is <strong className="text-accent-orange font-mono text-base">#{params.orderId}</strong>
+        <p className="text-sm text-slate-500">
+          Your order number is{' '}
+          <strong className="text-purple-600 font-mono text-base">#{params.orderId}</strong>
         </p>
-      </div>
+      </motion.div>
 
-      {/* Verification Notice Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 text-left space-y-4 shadow-xl">
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-          <Clock className="w-6 h-6 text-accent-amber shrink-0" />
+      {/* Info Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-white border border-slate-200 rounded-2xl text-left shadow-sm overflow-hidden"
+      >
+        {/* Payment Notice */}
+        <div className="flex items-start gap-3 p-5 border-b border-slate-100 bg-amber-50">
+          <Clock className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-extrabold text-white text-sm sm:text-base">
-              Manual Payment Verification in Progress
-            </h3>
-            <p className="text-xs text-slate-400">
-              Our admin team is verifying your bKash / Nagad Transaction ID. You will receive an SMS confirmation once verified.
+            <p className="text-sm font-bold text-amber-800">Payment Verification In Progress</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Our team is verifying your bKash / Nagad Transaction ID. You'll receive an SMS confirmation once verified.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs">
-          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-            <span className="text-slate-500 font-bold block">Delivery Status:</span>
-            <span className="text-emerald-400 font-extrabold">Order Confirmed — Preparing Dispatch</span>
+        {/* Status Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+          <div className="p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <Truck className="w-4 h-4 text-purple-500" />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Delivery Status</span>
+            </div>
+            <p className="text-sm font-bold text-emerald-600">Confirmed — Preparing Dispatch</p>
           </div>
-
-          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-            <span className="text-slate-500 font-bold block">Customer Support:</span>
-            <span className="text-white font-extrabold flex items-center gap-1">
-              <PhoneCall className="w-3.5 h-3.5 text-accent-orange" /> +880 1700-000000
-            </span>
+          <div className="p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <PhoneCall className="w-4 h-4 text-purple-500" />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Customer Support</span>
+            </div>
+            <a href="tel:+8801700000000" className="text-sm font-bold text-slate-800 hover:text-purple-600 transition">
+              +880 1700-000000
+            </a>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.45 }}
+        className="flex flex-col sm:flex-row items-center justify-center gap-3"
+      >
         <Link
           href="/shop"
-          className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-accent-orange text-slate-950 font-black text-sm hover:bg-accent-amber transition shadow-lg shadow-accent-orange/30 flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-7 py-3 rounded-xl bg-purple-600 text-white font-black text-sm hover:bg-purple-700 transition shadow-md flex items-center justify-center gap-2"
         >
           <ShoppingBag className="w-4 h-4" />
           <span>Continue Shopping</span>
         </Link>
-
         <Link
           href="/account"
-          className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-bold text-sm hover:bg-slate-800 transition flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-7 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 hover:border-purple-200 transition flex items-center justify-center gap-2"
         >
           <span>View My Orders</span>
           <ArrowRight className="w-4 h-4" />
         </Link>
-      </div>
+      </motion.div>
 
     </div>
   );
