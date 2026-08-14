@@ -5,21 +5,22 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  ShoppingBag, 
-  PhoneCall, 
-  ShieldCheck, 
-  Sparkles, 
-  Menu, 
-  X, 
-  Home, 
-  Layers, 
-  Tag, 
-  Flame, 
-  BookOpen, 
+import {
+  Search,
+  ShoppingBag,
+  PhoneCall,
+  ShieldCheck,
+  Sparkles,
+  Menu,
+  X,
+  Home,
+  Layers,
+  Tag,
+  Flame,
+  BookOpen,
   Phone,
-  ChevronRight
+  ChevronRight,
+  Truck,
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -54,145 +55,162 @@ export default function Header() {
   ];
 
   return (
-    <header className="w-full bg-slate-950 text-white sticky top-0 z-50 shadow-xl border-b border-brand-800/40">
-      
-      {/* Top Notice Banner */}
-      <div className="bg-gradient-to-r from-brand-950 via-brand-900 to-brand-950 border-b border-brand-800/30 text-[11px] sm:text-xs py-1.5 px-3 sm:px-4 text-slate-300">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 text-center sm:text-left">
-          <div className="flex items-center justify-center gap-1.5">
-            <span className="bg-accent-orange text-white px-2 py-0.5 rounded-full font-bold text-[9px] uppercase tracking-wider animate-pulse shrink-0">
+    <header className="w-full sticky top-0 z-50">
+
+      {/* ── Top Notice Strip ── */}
+      <div className="bg-slate-950 border-b border-slate-800/60 text-[10.5px] sm:text-xs py-1.5 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          {/* Left: tagline pill + text */}
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="shrink-0 bg-accent-orange text-white px-2.5 py-0.5 rounded-full font-black text-[9px] uppercase tracking-wider">
               Direct Import
             </span>
-            <span className="truncate max-w-[280px] sm:max-w-none">
-              {settings.tagline || 'China Gadgets Online Shop in Bangladesh | Fast Delivery Nationwide'}
+            <span className="text-slate-400 truncate hidden sm:block">
+              {settings.tagline || 'China Gadget Store in Bangladesh | Nationwide Delivery'}
             </span>
           </div>
-          
-          <div className="flex items-center justify-center gap-3 text-slate-400">
-            <a href={`tel:${settings.hotline || '+8801700000000'}`} className="flex items-center gap-1 hover:text-accent-orange transition">
-              <PhoneCall className="w-3 h-3 text-accent-orange shrink-0" />
+          {/* Right: hotline + badge */}
+          <div className="flex items-center gap-3 shrink-0 text-slate-400">
+            <a
+              href={`tel:${settings.hotline || '+8801700000000'}`}
+              className="flex items-center gap-1.5 hover:text-accent-orange transition font-medium"
+            >
+              <PhoneCall className="w-3 h-3 text-accent-orange" />
               <span>Hotline: {settings.hotline || '+880 1700-000000'}</span>
             </a>
-            <span className="hidden md:flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" /> 100% Original Products
+            <span className="hidden md:flex items-center gap-1 text-emerald-400 font-medium">
+              <ShieldCheck className="w-3 h-3" />
+              100% Original Products
             </span>
           </div>
         </div>
       </div>
 
-      {/* Main Header Row */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex items-center justify-between gap-3 sm:gap-4">
-          
-          {/* Mobile Menu Hamburger Toggle & Brand Logo */}
-          <div className="flex items-center gap-2.5">
+      {/* ── Main Header Bar ── */}
+      <div className="bg-slate-950 shadow-lg border-b border-slate-800/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+          <div className="flex items-center gap-3 sm:gap-5">
+
+            {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 hover:text-white hover:bg-slate-800 transition"
+              className="lg:hidden flex-shrink-0 p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition"
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5 text-accent-orange" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen
+                ? <X className="w-5 h-5 text-accent-orange" />
+                : <Menu className="w-5 h-5" />
+              }
             </button>
 
-            <Link href="/" className="flex items-center gap-2 group">
+            {/* Brand Logo */}
+            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
               {settings.logo ? (
-                <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-brand-600/50 shadow-md">
+                <div className="relative w-10 h-10 rounded-2xl overflow-hidden border border-brand-600/50 shadow-md">
                   <Image src={settings.logo} alt={settings.storeName} fill className="object-cover" />
                 </div>
               ) : (
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-accent-orange to-accent-amber flex items-center justify-center shadow-lg shadow-accent-orange/20 group-hover:scale-105 transition transform shrink-0">
-                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950 font-extrabold" />
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-accent-orange to-accent-amber flex items-center justify-center shadow-lg shadow-accent-orange/30 group-hover:scale-105 transition shrink-0">
+                  <Sparkles className="w-5 h-5 text-slate-950" />
                 </div>
               )}
-              
-              <div className="flex flex-col">
-                <span className="font-black text-lg sm:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-accent-amber uppercase leading-none">
+              <div className="flex flex-col leading-none">
+                <span className="font-black text-lg sm:text-xl tracking-tight uppercase text-white group-hover:text-accent-amber transition">
                   {settings.storeName || 'JAVED SHOP'}
                 </span>
-                <span className="text-[9px] sm:text-[10px] tracking-widest text-accent-orange uppercase font-semibold">
+                <span className="text-[9px] sm:text-[10px] tracking-widest text-accent-orange uppercase font-bold mt-0.5">
                   Gadget Store
                 </span>
               </div>
             </Link>
-          </div>
 
-          {/* Desktop Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden sm:flex flex-1 max-w-lg lg:max-w-xl relative items-center"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search earbuds, smartwatch, speaker, powerbank..."
-              className="w-full bg-slate-900/90 text-white text-xs sm:text-sm placeholder-slate-400 rounded-full pl-4 sm:pl-5 pr-12 py-2.5 border border-brand-700/50 focus:outline-none focus:border-accent-orange focus:ring-2 focus:ring-accent-orange/20 transition shadow-inner"
-            />
-            <button
-              type="submit"
-              className="absolute right-1 top-1 bottom-1 px-4 bg-gradient-to-r from-accent-orange to-accent-amber text-slate-950 rounded-full hover:brightness-110 font-bold transition flex items-center justify-center shadow"
-              aria-label="Search"
+            {/* Desktop Search Bar */}
+            <form
+              onSubmit={handleSearch}
+              className="hidden sm:flex flex-1 relative items-center"
             >
-              <Search className="w-4 h-4 text-slate-950" />
-            </button>
-          </form>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search earbuds, smartwatch, speaker, powerbank..."
+                className="w-full bg-slate-900 text-white text-xs sm:text-sm placeholder-slate-500 rounded-full pl-5 pr-14 py-2.5 border border-slate-700/60 focus:outline-none focus:border-accent-orange focus:ring-2 focus:ring-accent-orange/20 transition"
+              />
+              <button
+                type="submit"
+                className="absolute right-1 top-1 bottom-1 px-4 bg-gradient-to-r from-accent-orange to-accent-amber text-slate-950 rounded-full hover:brightness-110 font-bold transition flex items-center justify-center gap-1.5 text-xs shadow"
+                aria-label="Search"
+              >
+                <Search className="w-3.5 h-3.5 text-slate-950" />
+                <span className="hidden lg:inline font-black">Search</span>
+              </button>
+            </form>
 
-          {/* Cart Icon & Mobile Actions */}
-          <div className="flex items-center gap-2">
-            <Link
-              href="/cart"
-              className="relative flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-brand-900 to-brand-800 border border-brand-700/60 text-white hover:border-accent-orange transition shadow-md group"
-            >
-              <div className="relative">
-                <ShoppingBag className="w-5 h-5 text-accent-amber group-hover:scale-110 transition" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-2.5 -right-2.5 bg-accent-orange text-white text-[10px] font-extrabold w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-lg border-2 border-slate-950 animate-bounce">
-                    {totalItems}
-                  </span>
-                )}
+            {/* Right: Delivery info + Cart */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto sm:ml-0">
+              {/* Delivery Info (desktop only) */}
+              <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl">
+                <Truck className="w-3.5 h-3.5 text-accent-orange shrink-0" />
+                <div className="leading-none">
+                  <p className="text-white font-bold text-[10px]">Free Shipping</p>
+                  <p className="text-slate-500 text-[9px]">Orders above ৳2000</p>
+                </div>
               </div>
-              <span className="text-xs sm:text-sm font-bold hidden sm:inline">
-                Cart
-              </span>
-            </Link>
+
+              {/* Cart Button */}
+              <Link
+                href="/cart"
+                className="relative flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-br from-accent-orange to-accent-amber text-slate-950 font-black text-xs hover:brightness-110 transition shadow-md shadow-accent-orange/20 group"
+              >
+                <div className="relative">
+                  <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950 group-hover:scale-110 transition" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-slate-950 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow border border-accent-orange">
+                      {totalItems}
+                    </span>
+                  )}
+                </div>
+                <span className="hidden sm:inline font-black">Cart</span>
+              </Link>
+            </div>
+
           </div>
 
+          {/* Mobile Search Bar */}
+          <div className="sm:hidden mt-2.5">
+            <form onSubmit={handleSearch} className="relative flex items-center">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search China gadgets..."
+                className="w-full bg-slate-900 text-white text-xs placeholder-slate-500 rounded-full pl-4 pr-11 py-2.5 border border-slate-700/60 focus:outline-none focus:border-accent-orange"
+              />
+              <button
+                type="submit"
+                className="absolute right-1 top-1 bottom-1 px-3 bg-accent-orange text-white rounded-full flex items-center justify-center"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          </div>
         </div>
-
-        {/* Mobile Search Bar */}
-        <div className="sm:hidden mt-2.5">
-          <form onSubmit={handleSearch} className="relative flex items-center">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search China gadgets..."
-              className="w-full bg-slate-900 text-white text-xs placeholder-slate-400 rounded-full pl-4 pr-10 py-2 border border-brand-700/50 focus:outline-none focus:border-accent-orange"
-            />
-            <button
-              type="submit"
-              className="absolute right-1 top-1 bottom-1 px-3 bg-accent-orange text-white rounded-full flex items-center justify-center"
-            >
-              <Search className="w-3.5 h-3.5" />
-            </button>
-          </form>
-        </div>
-
       </div>
 
-      {/* Mobile Drawer Menu Overlay */}
+      {/* ── Mobile Slide-down Drawer ── */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-slate-900 border-b border-slate-800 overflow-hidden shadow-2xl"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="lg:hidden bg-slate-950 border-b border-slate-800 shadow-2xl"
           >
-            <div className="px-4 py-4 space-y-3">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">
-                Navigation Menu
-              </span>
+            <div className="px-4 py-4 space-y-3 max-w-7xl mx-auto">
+              <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">
+                Navigation
+              </p>
 
               <div className="grid grid-cols-1 gap-1">
                 {navLinks.map((link) => {
@@ -204,32 +222,32 @@ export default function Header() {
                       key={link.name}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between p-3 rounded-xl font-bold text-xs transition ${
+                      className={`flex items-center justify-between px-3.5 py-3 rounded-xl font-semibold text-xs transition ${
                         isActive
-                          ? 'bg-brand-900 text-white border border-brand-600/40'
-                          : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                          ? 'bg-brand-900/80 text-white border border-brand-700/40'
+                          : 'text-slate-300 hover:text-white hover:bg-slate-900'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 ${link.badge ? 'text-accent-orange' : 'text-slate-400'}`} />
+                        <Icon className={`w-4 h-4 ${link.badge ? 'text-accent-orange' : isActive ? 'text-accent-amber' : 'text-slate-500'}`} />
                         <span>{link.name}</span>
                         {link.badge && (
-                          <span className="bg-accent-orange text-slate-950 text-[9px] font-extrabold px-1.5 py-0.2 rounded-full uppercase">
+                          <span className="bg-accent-orange text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">
                             {link.badge}
                           </span>
                         )}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-500" />
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
                     </Link>
                   );
                 })}
               </div>
 
-              {/* Mobile Hotline Quick Action */}
-              <div className="pt-2 border-t border-slate-800">
+              {/* Mobile Hotline CTA */}
+              <div className="pt-2 border-t border-slate-800/80">
                 <a
                   href={`tel:${settings.hotline || '+8801700000000'}`}
-                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-r from-accent-orange to-accent-amber text-slate-950 font-black text-xs shadow-md"
+                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-accent-orange to-accent-amber text-slate-950 font-black text-xs shadow-md"
                 >
                   <PhoneCall className="w-4 h-4" />
                   <span>Call Hotline: {settings.hotline || '+880 1700-000000'}</span>
