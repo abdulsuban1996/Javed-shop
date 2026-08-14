@@ -19,12 +19,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between antialiased">
+      <body className="bg-white text-slate-900 min-h-screen flex flex-col justify-between antialiased">
         <SettingsProvider>
           <CartProvider>
             <Header />
             <Navbar />
-            <main className="flex-grow">{children}</main>
+            <main className="flex-grow bg-white">{children}</main>
             <Footer />
           </CartProvider>
         </SettingsProvider>
