@@ -2,43 +2,42 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, Zap, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Percent } from 'lucide-react';
 
 const BANNERS = [
   {
     id: 1,
-    title: 'MEGA CHINA GADGET SALE',
-    subtitle: 'Up to 50% OFF on TWS Earbuds & Smartwatches',
-    description: 'Direct imported high-quality electronics with warranty & cash on delivery across Bangladesh.',
-    ctaText: 'Shop Deals Now',
+    badge: 'FLASH SALE',
+    title: 'MEGA SALE',
+    highlight: 'UP TO 60% OFF',
+    description: 'On Selected Items Only',
+    ctaText: 'Shop Now',
     ctaLink: '/shop?deal=true',
-    badge: 'FLASH SALE LIVE',
-    bgGradient: 'from-brand-950 via-slate-900 to-purple-950',
-    image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=1200&auto=format&fit=crop',
+    bg: 'from-purple-900 via-purple-800 to-indigo-900',
+    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=600&auto=format&fit=crop',
   },
   {
     id: 2,
-    title: 'SMARTWATCH 8 SERIES ULTRA',
-    subtitle: 'HD Curved Display & Bluetooth Calling',
-    description: 'Track your health 24/7 with heart rate & SpO2 sensors. Water resistant with 30-day standby.',
-    ctaText: 'Order Today',
-    ctaLink: '/shop?category=electronics',
     badge: 'NEW ARRIVAL',
-    bgGradient: 'from-slate-950 via-brand-950 to-slate-900',
-    image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=1200&auto=format&fit=crop',
+    title: 'SMARTWATCH',
+    highlight: 'ULTRA SERIES',
+    description: 'HD Display & Bluetooth Calling',
+    ctaText: 'Order Now',
+    ctaLink: '/shop?category=electronics',
+    bg: 'from-indigo-900 via-purple-900 to-violet-900',
+    image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop',
   },
   {
     id: 3,
-    title: 'AUDIO & SOUND EXPERIENCE',
-    subtitle: 'Portable RGB Bluetooth Speakers',
-    description: '360° Bass boost, IPX7 waterproof rating, perfect for indoor parties & outdoor travel.',
-    ctaText: 'Explore Speakers',
-    ctaLink: '/shop?category=electronics',
     badge: 'BEST SELLER',
-    bgGradient: 'from-purple-950 via-slate-900 to-brand-950',
-    image: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=1200&auto=format&fit=crop',
+    title: 'AUDIO DEAL',
+    highlight: 'SPEAKERS & EARBUDS',
+    description: '360° Bass Boost | IPX7 Waterproof',
+    ctaText: 'Explore Now',
+    ctaLink: '/shop?category=electronics',
+    bg: 'from-violet-900 via-purple-800 to-indigo-900',
+    image: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&auto=format&fit=crop',
   },
 ];
 
@@ -55,133 +54,92 @@ export default function HeroSlider() {
   const slide = BANNERS[currentSlide];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6 }}
-      className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-brand-800/40 bg-slate-950 group h-[340px] sm:h-[420px]"
-    >
+    <div className="relative w-full rounded-2xl overflow-hidden shadow-lg group h-[280px] sm:h-[340px] lg:h-[380px]">
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
-          initial={{ opacity: 0, x: 50 }}
+          initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -50 }}
-          transition={{ duration: 0.5 }}
-          className={`absolute inset-0 bg-gradient-to-r ${slide.bgGradient}`}
+          exit={{ opacity: 0, x: -40 }}
+          transition={{ duration: 0.45 }}
+          className={`absolute inset-0 bg-gradient-to-r ${slide.bg} flex items-center`}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent-orange/15 via-transparent to-transparent opacity-70"></div>
+          {/* Decorative circles */}
+          <div className="absolute top-4 right-4 w-32 h-32 sm:w-48 sm:h-48 rounded-full bg-white/5 blur-2xl" />
+          <div className="absolute bottom-0 left-1/2 w-24 h-24 rounded-full bg-yellow-400/10 blur-xl" />
 
-          {/* Content Grid */}
-          <div className="relative z-10 h-full max-w-7xl mx-auto px-6 sm:px-10 flex flex-col justify-center">
-            <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-6">
-              
-              {/* Left Text Column */}
-              <div className="md:col-span-7 space-y-3 sm:space-y-4">
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-orange/20 border border-accent-orange/40 text-accent-orange text-xs font-extrabold uppercase tracking-wider"
-                >
-                  <Zap className="w-3.5 h-3.5 animate-bounce" />
-                  {slide.badge}
-                </motion.div>
-                
-                <motion.h1
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight"
-                >
+          {/* Content */}
+          <div className="relative z-10 flex items-center justify-between w-full h-full px-8 sm:px-12">
+            {/* Left text */}
+            <div className="space-y-3 max-w-xs sm:max-w-sm">
+              <span className="inline-block bg-white/20 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-white/30">
+                {slide.badge}
+              </span>
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
                   {slide.title}
-                </motion.h1>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-accent-amber font-bold text-sm sm:text-lg"
-                >
-                  {slide.subtitle}
-                </motion.p>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-slate-300 text-xs sm:text-sm line-clamp-2 max-w-lg"
-                >
-                  {slide.description}
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="pt-2 flex items-center gap-3"
-                >
-                  <Link
-                    href={slide.ctaLink}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-accent-orange to-accent-amber text-slate-950 font-black text-sm hover:brightness-110 transition shadow-lg shadow-accent-orange/30 flex items-center gap-2 transform active:scale-95"
-                  >
-                    <span>{slide.ctaText}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  
-                  <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-400 font-semibold bg-emerald-950/60 px-3 py-2 rounded-xl border border-emerald-800/40">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Verified China Direct</span>
-                  </div>
-                </motion.div>
+                </h1>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-black text-yellow-400 leading-tight">
+                  {slide.highlight}
+                </p>
               </div>
+              <p className="text-white/75 text-xs sm:text-sm font-medium">
+                {slide.description}
+              </p>
+              <Link
+                href={slide.ctaLink}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white text-purple-700 font-black text-sm hover:bg-yellow-400 hover:text-purple-900 transition shadow-lg transform active:scale-95"
+              >
+                <span>{slide.ctaText}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
 
-              {/* Right Image */}
-              <div className="hidden md:block md:col-span-5 relative h-64 lg:h-72 w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50">
-                <Image
-                  src={slide.image}
-                  alt={slide.title}
-                  fill
-                  className="object-cover transform hover:scale-105 transition duration-700"
-                  priority
-                />
+            {/* Right decorative percent & image */}
+            <div className="relative hidden sm:flex items-center justify-center w-48 h-48 lg:w-64 lg:h-64 shrink-0">
+              {/* Big % decoration */}
+              <div className="absolute -top-4 -right-4 text-yellow-400/20 font-black text-[120px] lg:text-[160px] leading-none select-none">
+                %
               </div>
-
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="relative z-10 w-40 h-40 lg:w-56 lg:h-56 object-contain drop-shadow-2xl rounded-2xl"
+              />
             </div>
           </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation Arrows */}
+      {/* Nav arrows */}
       <button
-        onClick={() => setCurrentSlide((prev) => (prev === 0 ? BANNERS.length - 1 : prev - 1))}
-        className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-slate-900/80 text-white hover:bg-accent-orange hover:text-slate-950 transition opacity-0 group-hover:opacity-100"
-        aria-label="Previous Slide"
+        onClick={() => setCurrentSlide((p) => (p === 0 ? BANNERS.length - 1 : p - 1))}
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/20 text-white hover:bg-white hover:text-purple-700 transition flex items-center justify-center opacity-0 group-hover:opacity-100"
+        aria-label="Previous"
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="w-4 h-4" />
       </button>
-      
       <button
-        onClick={() => setCurrentSlide((prev) => (prev + 1) % BANNERS.length)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-slate-900/80 text-white hover:bg-accent-orange hover:text-slate-950 transition opacity-0 group-hover:opacity-100"
-        aria-label="Next Slide"
+        onClick={() => setCurrentSlide((p) => (p + 1) % BANNERS.length)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/20 text-white hover:bg-white hover:text-purple-700 transition flex items-center justify-center opacity-0 group-hover:opacity-100"
+        aria-label="Next"
       >
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-4 h-4" />
       </button>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      {/* Dot indicators */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
         {BANNERS.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
-            className={`h-2 rounded-full transition-all ${
-              currentSlide === idx ? 'w-8 bg-accent-orange' : 'w-2 bg-slate-700'
+            className={`h-1.5 rounded-full transition-all ${
+              currentSlide === idx ? 'w-6 bg-white' : 'w-1.5 bg-white/40'
             }`}
             aria-label={`Slide ${idx + 1}`}
           />
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }

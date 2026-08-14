@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
-import { Tag, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import ProductCard, { Product } from '../product/ProductCard';
 
 export default function DealsOfTheDay({ products }: { products: Product[] }) {
@@ -11,75 +11,31 @@ export default function DealsOfTheDay({ products }: { products: Product[] }) {
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.4 },
-    },
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="my-8"
-    >
+    <section className="my-6">
       {/* Section Header */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl backdrop-blur-md"
-      >
-        <div className="flex items-center gap-3">
-          <motion.div
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ repeat: Infinity, duration: 4 }}
-            className="w-10 h-10 rounded-2xl bg-accent-orange/20 border border-accent-orange/40 flex items-center justify-center text-accent-orange shadow-md"
-          >
-            <Tag className="w-5 h-5" />
-          </motion.div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight">
-                Deals of the Day
-              </h2>
-              <motion.span
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="bg-accent-orange text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase shadow-md"
-              >
-                Hot Offer
-              </motion.span>
-            </div>
-            <p className="text-xs text-slate-400">
-              Limited quantity gadget deals imported directly from China
-            </p>
-          </div>
-        </div>
-
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base sm:text-lg font-black text-slate-800 tracking-tight">
+          Deals of the Day
+        </h2>
         <Link
           href="/shop?deal=true"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-accent-amber hover:text-accent-orange transition group"
+          className="flex items-center gap-1 text-xs font-semibold text-purple-600 hover:text-purple-800 transition group"
         >
-          <span>View All Deals</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+          <span>View All</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
         </Link>
-      </motion.div>
+      </div>
 
-      {/* Staggered Cards Container */}
+      {/* Products Row */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -92,6 +48,6 @@ export default function DealsOfTheDay({ products }: { products: Product[] }) {
           </motion.div>
         ))}
       </motion.div>
-    </motion.section>
+    </section>
   );
 }
