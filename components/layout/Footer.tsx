@@ -27,13 +27,6 @@ export default function Footer() {
     { label: 'Contact Us', href: '/contact' },
   ];
 
-  const policyLinks = [
-    { label: 'Privacy Policy', href: '#' },
-    { label: 'Return Policy', href: '#' },
-    { label: 'Shipping Info', href: '#' },
-    { label: 'Terms of Service', href: '#' },
-  ];
-
   return (
     <footer className="w-full bg-slate-950 text-slate-400 mt-12">
       
@@ -63,7 +56,7 @@ export default function Footer() {
 
       {/* ── Main Footer Grid ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
 
           {/* Col 1 — Brand */}
           <div className="space-y-5">
@@ -171,37 +164,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Col 4 — Payment & Policies */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-black text-white uppercase tracking-widest">
-              We Accept
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { label: 'bKash',            bg: 'bg-pink-950/60',   border: 'border-pink-700/40',   text: 'text-pink-400' },
-                { label: 'Nagad',            bg: 'bg-orange-950/60', border: 'border-orange-700/40', text: 'text-orange-400' },
-                { label: 'Rocket',           bg: 'bg-purple-950/60', border: 'border-purple-700/40', text: 'text-purple-400' },
-                { label: 'Cash on Delivery', bg: 'bg-emerald-950/60',border: 'border-emerald-700/40',text: 'text-emerald-400' },
-              ].map(({ label, bg, border, text }) => (
-                <div key={label} className={`px-2.5 py-1.5 rounded-lg ${bg} border ${border} text-center`}>
-                  <span className={`text-[10px] font-black ${text}`}>{label}</span>
-                </div>
-              ))}
-            </div>
 
-            <div className="pt-2 space-y-2">
-              <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Policies</h4>
-              <ul className="space-y-1.5">
-                {policyLinks.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link href={href} className="text-[11px] text-slate-500 hover:text-slate-300 transition">
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
 
         </div>
       </div>
