@@ -109,9 +109,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         
         {/* Left Column: Image Gallery */}
         <div className="md:col-span-6 space-y-4">
-          <div className="relative w-full aspect-square bg-slate-100 border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          <div className="relative w-full aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
             {discountPercent > 0 && (
-              <span className="absolute top-4 left-4 z-10 bg-accent-orange text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md">
+              <span className="absolute top-4 left-4 z-10 bg-accent-orange text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-lg">
                 -{discountPercent}% OFF
               </span>
             )}
@@ -134,7 +134,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition ${
                     selectedImage === img
                       ? 'border-accent-orange scale-105 shadow-md'
-                      : 'border-slate-200 opacity-70 hover:opacity-100'
+                      : 'border-slate-800 opacity-70 hover:opacity-100'
                   }`}
                 >
                   <Image src={img} alt={`Thumb ${idx}`} fill className="object-cover" />
@@ -147,21 +147,21 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         {/* Right Column: Title, Pricing, Actions */}
         <div className="md:col-span-6 space-y-6">
           <div className="space-y-2">
-            <span className="text-xs font-bold text-orange-600 uppercase tracking-wider bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
+            <span className="text-xs font-bold text-accent-orange uppercase tracking-wider bg-accent-orange/10 px-3 py-1 rounded-full border border-accent-orange/30">
               Direct China Import
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">
               {product.title}
             </h1>
 
             {/* Ratings */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center text-amber-500">
+              <div className="flex items-center text-amber-400">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-current text-amber-500" />
+                  <Star key={i} className="w-4 h-4 fill-current text-amber-400" />
                 ))}
               </div>
-              <span className="text-xs text-slate-700 font-bold">
+              <span className="text-xs text-slate-300 font-bold">
                 {product.rating} / 5.0
               </span>
               <span className="text-xs text-slate-500">
@@ -171,9 +171,9 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           </div>
 
           {/* Price Box */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-1 shadow-sm">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-1">
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-black text-orange-600">
+              <span className="text-3xl font-black text-accent-orange">
                 ৳{(product.discount_price || product.price).toLocaleString()}
               </span>
               {product.discount_price && (
@@ -182,30 +182,30 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 </span>
               )}
             </div>
-            <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1 pt-1">
+            <p className="text-xs text-emerald-400 font-semibold flex items-center gap-1 pt-1">
               <Check className="w-4 h-4" /> In Stock ({product.stock} units available in Dhaka warehouse)
             </p>
           </div>
 
           {/* Quantity Selector */}
           <div className="space-y-2">
-            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+            <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
               Quantity
             </label>
             <div className="flex items-center gap-3">
-              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1">
+              <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-200 rounded-lg font-bold"
+                  className="w-9 h-9 flex items-center justify-center text-slate-300 hover:bg-slate-800 rounded-lg font-bold"
                 >
                   -
                 </button>
-                <span className="w-12 text-center text-sm font-extrabold text-slate-900">
+                <span className="w-12 text-center text-sm font-extrabold text-white">
                   {quantity}
                 </span>
                 <button
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="w-9 h-9 flex items-center justify-center text-slate-700 hover:bg-slate-200 rounded-lg font-bold"
+                  className="w-9 h-9 flex items-center justify-center text-slate-300 hover:bg-slate-800 rounded-lg font-bold"
                 >
                   +
                 </button>
@@ -217,19 +217,19 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <button
               onClick={handleAddToCart}
-              className={`py-3.5 px-6 rounded-2xl font-black text-sm transition flex items-center justify-center gap-2 shadow-sm ${
+              className={`py-3.5 px-6 rounded-2xl font-black text-sm transition flex items-center justify-center gap-2 shadow-lg ${
                 addedToast
                   ? 'bg-emerald-600 text-white'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+                  : 'bg-brand-900 hover:bg-brand-800 text-white border border-brand-700'
               }`}
             >
-              {addedToast ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5 text-amber-400" />}
+              {addedToast ? <Check className="w-5 h-5" /> : <ShoppingCart className="w-5 h-5 text-accent-amber" />}
               <span>{addedToast ? 'Added to Cart!' : 'Add to Cart'}</span>
             </button>
 
             <button
               onClick={handleBuyNow}
-              className="py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-accent-orange to-accent-amber text-slate-950 hover:brightness-110 transition flex items-center justify-center gap-2 shadow-md transform active:scale-95"
+              className="py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-accent-orange to-accent-amber text-slate-950 hover:brightness-110 transition flex items-center justify-center gap-2 shadow-lg shadow-accent-orange/30 transform active:scale-95"
             >
               <Zap className="w-5 h-5 fill-current" />
               <span>Buy Now (Order)</span>
@@ -237,19 +237,19 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
           </div>
 
           {/* Delivery & Warranty Info */}
-          <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200 text-xs text-slate-700">
-            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
-              <Truck className="w-5 h-5 text-orange-600 shrink-0" />
+          <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-800/80 text-xs text-slate-300">
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <Truck className="w-5 h-5 text-accent-orange shrink-0" />
               <div>
-                <p className="font-extrabold text-slate-900">Nationwide Delivery</p>
-                <p className="text-[11px] text-slate-500">Inside Dhaka ৳60, Outside ৳120</p>
+                <p className="font-extrabold text-white">Nationwide Delivery</p>
+                <p className="text-[11px] text-slate-400">Inside Dhaka ৳60, Outside ৳120</p>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800">
+              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
               <div>
-                <p className="font-extrabold text-slate-900">Warranty</p>
-                <p className="text-[11px] text-slate-500">7 Days Replacement</p>
+                <p className="font-extrabold text-white">Warranty</p>
+                <p className="text-[11px] text-slate-400">7 Days Replacement</p>
               </div>
             </div>
           </div>
@@ -259,12 +259,12 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       </div>
 
       {/* Specifications & Description Tabs */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
-        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight border-b border-slate-100 pb-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
+        <h2 className="text-xl font-black text-white uppercase tracking-tight border-b border-slate-800 pb-4">
           Product Details & Specifications
         </h2>
 
-        <p className="text-slate-600 text-sm leading-relaxed">
+        <p className="text-slate-300 text-sm leading-relaxed">
           {product.description}
         </p>
 
@@ -273,11 +273,11 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             <table className="w-full text-left text-xs sm:text-sm border-collapse">
               <tbody>
                 {Object.entries(product.specifications).map(([key, val]: any, i) => (
-                  <tr key={i} className={i % 2 === 0 ? 'bg-slate-50' : 'bg-white'}>
-                    <td className="py-3 px-4 font-bold text-slate-600 w-1/3 border-b border-slate-100">
+                  <tr key={i} className={i % 2 === 0 ? 'bg-slate-950/60' : 'bg-slate-900'}>
+                    <td className="py-3 px-4 font-bold text-slate-400 w-1/3 border-b border-slate-800">
                       {key}
                     </td>
-                    <td className="py-3 px-4 font-medium text-slate-900 border-b border-slate-100">
+                    <td className="py-3 px-4 font-medium text-white border-b border-slate-800">
                       {val}
                     </td>
                   </tr>
