@@ -64,10 +64,10 @@ export default function ContactPage() {
           <span>Customer Support Center</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
           Get in Touch with {settings.storeName || 'Javed Shop'}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-medium">
+        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
           Have questions about direct China imports, warranty, wholesale orders, or delivery tracking? Our support team is ready to assist you.
         </p>
       </motion.div>
