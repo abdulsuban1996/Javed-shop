@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createClient } from '../lib/supabase/client';
 
 export interface SiteSettings {
   storeName: string;
@@ -46,12 +47,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
+    // 1. Initial load from local storage
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('javed_shop_settings');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          // Ensure valid logo and favicon paths are retained
           if (!parsed.logo || typeof parsed.logo !== 'string' || parsed.logo.trim() === '') {
             parsed.logo = '/javed-shop-logo.png';
           }
@@ -59,11 +60,51 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             parsed.favicon = '/javed-shop-icon.png';
           }
           setSettings((prev) => ({ ...prev, ...parsed }));
-        } catch (e) {
-          console.error('Error parsing settings:', e);
-        }
+        } catch (e) {}
       }
+    }
 
+    // 2. Fetch live settings from Supabase
+    const fetchSupabaseSettings = async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('*')
+          .eq('id', 'default')
+          .single();
+
+        if (!error && data) {
+          const cloudSettings: Partial<SiteSettings> = {
+            storeName: data.store_name || DEFAULT_SETTINGS.storeName,
+            tagline: data.tagline || DEFAULT_SETTINGS.tagline,
+            logo: data.logo || DEFAULT_SETTINGS.logo,
+            favicon: data.favicon || DEFAULT_SETTINGS.favicon,
+            email: data.email || DEFAULT_SETTINGS.email,
+            hotline: data.hotline || DEFAULT_SETTINGS.hotline,
+            whatsapp: data.whatsapp || DEFAULT_SETTINGS.whatsapp,
+            address: data.address || DEFAULT_SETTINGS.address,
+            facebookUrl: data.facebook_url || DEFAULT_SETTINGS.facebookUrl,
+            instagramUrl: data.instagram_url || DEFAULT_SETTINGS.instagramUrl,
+            youtubeUrl: data.youtube_url || DEFAULT_SETTINGS.youtubeUrl,
+            clearanceNotice: data.clearance_notice || DEFAULT_SETTINGS.clearanceNotice,
+          };
+
+          setSettings((prev) => {
+            const merged = { ...prev, ...cloudSettings };
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('javed_shop_settings', JSON.stringify(merged));
+            }
+            return merged;
+          });
+        }
+      } catch (err) {}
+    };
+
+    fetchSupabaseSettings();
+
+    // 3. Storage event listeners
+    if (typeof window !== 'undefined') {
       const handleStorageChange = () => {
         const updated = localStorage.getItem('javed_shop_settings');
         if (updated) {
@@ -90,7 +131,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const updateSettings = (newSettings: Partial<SiteSettings>) => {
+  const updateSettings = async (newSettings: Partial<SiteSettings>) => {
     setSettings((prev) => {
       const updated = { ...prev, ...newSettings };
       if (!updated.logo || updated.logo.trim() === '') {
@@ -102,6 +143,27 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
       return updated;
     });
+
+    // Save to Supabase
+    try {
+      const supabase = createClient();
+      await supabase.from('site_settings').upsert({
+        id: 'default',
+        store_name: newSettings.storeName,
+        tagline: newSettings.tagline,
+        logo: newSettings.logo,
+        favicon: newSettings.favicon,
+        email: newSettings.email,
+        hotline: newSettings.hotline,
+        whatsapp: newSettings.whatsapp,
+        address: newSettings.address,
+        facebook_url: newSettings.facebookUrl,
+        instagram_url: newSettings.instagramUrl,
+        youtube_url: newSettings.youtubeUrl,
+        clearance_notice: newSettings.clearanceNotice,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {}
   };
 
   return (
