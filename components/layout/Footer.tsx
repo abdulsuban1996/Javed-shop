@@ -27,7 +27,10 @@ export default function Footer() {
     { label: 'Contact Support', href: '/contact' },
   ];
 
-  const logoSrc = settings.logo && settings.logo.trim() !== '' ? settings.logo : '/javed-shop-logo.png';
+  const logoSrc =
+    settings.logo && settings.logo.trim().startsWith('https://')
+      ? settings.logo
+      : '/javed-shop-logo.png';
 
   return (
     <footer className="w-full bg-[#0B1220] text-slate-300 mt-12 border-t border-slate-800">
@@ -64,11 +67,10 @@ export default function Footer() {
           <div className="space-y-3.5">
             <Link href="/" className="inline-block group">
               <div className="bg-white px-3 py-1.5 rounded-xl inline-flex items-center shadow-sm">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={logoSrc}
                   alt={settings.storeName || 'JAVED SHOP'}
-                  width={180}
-                  height={40}
                   className="h-7 sm:h-8 w-auto object-contain"
                 />
               </div>

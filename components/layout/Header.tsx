@@ -48,12 +48,18 @@ export default function Header() {
     { name: 'Home', href: '/', icon: Home },
     { name: 'Shop All', href: '/shop', icon: Layers },
     { name: 'Deals of the Day', href: '/shop?deal=true', icon: Tag },
+
     { name: 'Flash Sale', href: '/shop?flash=true', icon: Flame, badge: 'HOT' },
     { name: 'Blog & Reviews', href: '/blog', icon: BookOpen },
     { name: 'Contact Us', href: '/contact', icon: Phone },
   ];
 
-  const logoSrc = settings.logo && settings.logo.trim() !== '' ? settings.logo : '/javed-shop-logo.png';
+  // Only use settings.logo if it is a valid CDN/remote URL uploaded by admin.
+  // Otherwise always use the local static logo file — this prevents localStorage corruption breaking the logo.
+  const logoSrc =
+    settings.logo && settings.logo.trim().startsWith('https://')
+      ? settings.logo
+      : '/javed-shop-logo.png';
 
   return (
     <header className="w-full sticky top-0 z-50 shadow-sm">
@@ -104,18 +110,15 @@ export default function Header() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Brand Logo - Enlarged and clear */}
+            {/* Brand Logo - Using plain img for guaranteed rendering */}
             <Link href="/" className="flex items-center shrink-0 group py-0.5">
-              <div className="relative flex items-center">
-                <Image
-                  src={logoSrc}
-                  alt={settings.storeName || 'JAVED SHOP'}
-                  width={280}
-                  height={68}
-                  className="h-9 sm:h-11 md:h-13 lg:h-14 w-auto object-contain group-hover:opacity-95 transition"
-                  priority
-                />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoSrc}
+                alt={settings.storeName || 'JAVED SHOP'}
+                className="h-10 sm:h-12 lg:h-14 w-auto object-contain group-hover:opacity-95 transition"
+                fetchPriority="high"
+              />
             </Link>
 
             {/* Desktop Search Bar */}
