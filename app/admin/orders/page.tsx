@@ -1,8 +1,21 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, CheckCircle2, Clock, Truck, XCircle, RefreshCw, Check, AlertCircle, RotateCw } from 'lucide-react';
+import { 
+  ShoppingBag, 
+  Search, 
+  CheckCircle2, 
+  Clock, 
+  Package, 
+  Truck, 
+  Check, 
+  XCircle, 
+  RotateCw, 
+  ChevronDown, 
+  MoreVertical,
+  X
+} from 'lucide-react';
 import { createClient } from '../../../lib/supabase/client';
 
 const DEFAULT_ORDERS = [
@@ -60,13 +73,59 @@ const DEFAULT_ORDERS = [
   },
 ];
 
+const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string; border: string }> = {
+  Pending: {
+    label: 'Pending',
+    icon: Clock,
+    color: 'text-amber-700',
+    bg: 'bg-amber-50',
+    border: 'border-amber-200',
+  },
+  Verified: {
+    label: 'Approve / Verified',
+    icon: CheckCircle2,
+    color: 'text-[#2563EB]',
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+  },
+  Processing: {
+    label: 'Processing',
+    icon: Package,
+    color: 'text-purple-700',
+    bg: 'bg-purple-50',
+    border: 'border-purple-200',
+  },
+  Shipped: {
+    label: 'Shipped',
+    icon: Truck,
+    color: 'text-indigo-700',
+    bg: 'bg-indigo-50',
+    border: 'border-indigo-200',
+  },
+  Delivered: {
+    label: 'Delivered',
+    icon: Check,
+    color: 'text-emerald-700',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+  },
+  Cancelled: {
+    label: 'Cancelled',
+    icon: XCircle,
+    color: 'text-rose-700',
+    bg: 'bg-rose-50',
+    border: 'border-rose-200',
+  },
+};
+
 export default function AdminOrdersPage() {
-  const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Verified' | 'Shipped' | 'Delivered' | 'Cancelled'>('All');
+  const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Verified' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled'>('All');
   const [search, setSearch] = useState('');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
   const [orders, setOrders] = useState(DEFAULT_ORDERS);
   const [loading, setLoading] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
+  const [activePopupOrderId, setActivePopupOrderId] = useState<string | null>(null);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -84,7 +143,6 @@ export default function AdminOrdersPage() {
         }
       }
 
-      // Query Supabase for real orders
       try {
         const supabase = createClient();
         const { data, error } = await supabase
@@ -115,7 +173,6 @@ export default function AdminOrdersPage() {
             items: d.notes || 'Store Products',
           }));
 
-          // Merge: Put Supabase orders first, followed by unique stored/mock ones
           const existingNums = new Set(mapped.map((m: any) => m.order_number));
           const leftovers = currentOrders.filter((o) => !existingNums.has(o.order_number));
           currentOrders = [...mapped, ...leftovers];
@@ -146,6 +203,8 @@ export default function AdminOrdersPage() {
   const updateOrderStatus = async (id: string, newStatus: string, orderNumber: string) => {
     const updated = orders.map((o) => (o.id === id ? { ...o, status: newStatus } : o));
     setOrders(updated);
+    setActivePopupOrderId(null);
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('javed_shop_orders', JSON.stringify(updated));
     }
@@ -157,7 +216,7 @@ export default function AdminOrdersPage() {
         .eq('order_number', orderNumber);
     } catch (e) {}
 
-    setActionNotice(`Order #${orderNumber} marked as ${newStatus}`);
+    setActionNotice(`Order #${orderNumber} updated to "${newStatus}"`);
     setTimeout(() => {
       setActionNotice(null);
     }, 3000);
@@ -178,7 +237,7 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 pb-20">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E7EB] pb-4">
@@ -187,7 +246,7 @@ export default function AdminOrdersPage() {
             <ShoppingBag className="w-7 h-7 text-[#2563EB]" />
             <span>Orders Management</span>
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Verify payments, manage order status &amp; process cancellations</p>
+          <p className="text-xs text-slate-500 font-medium">Verify payments, update order progression &amp; manage cancellations</p>
         </div>
 
         {/* Right Header Actions: Refresh & Search Bar */}
@@ -237,7 +296,7 @@ export default function AdminOrdersPage() {
 
       {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2 border-b border-[#E5E7EB] pb-3 text-xs font-extrabold">
-        {(['All', 'Pending', 'Verified', 'Shipped', 'Delivered', 'Cancelled'] as const).map((tab) => {
+        {(['All', 'Pending', 'Verified', 'Processing', 'Shipped', 'Delivered', 'Cancelled'] as const).map((tab) => {
           const count = tab === 'All' ? orders.length : orders.filter((o) => o.status === tab).length;
           const isActive = activeTab === tab;
           return (
@@ -262,8 +321,8 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-visible">
+        <div className="overflow-x-auto min-h-[350px]">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-[#F8FAFC] text-slate-500 font-extrabold border-b border-[#E5E7EB] uppercase tracking-wider text-[11px]">
@@ -284,115 +343,202 @@ export default function AdminOrdersPage() {
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((o) => (
-                  <tr key={o.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-4 px-4 font-bold text-[#2563EB] font-mono">
-                      <div>{o.order_number}</div>
-                      <div className="text-[10px] text-slate-400 font-normal">{o.date}</div>
-                    </td>
+                filteredOrders.map((o) => {
+                  const currentStatusCfg = STATUS_CONFIG[o.status] || STATUS_CONFIG.Pending;
+                  const StatusIcon = currentStatusCfg.icon;
+                  const isPopupOpen = activePopupOrderId === o.id;
 
-                    <td className="py-4 px-4 font-bold text-slate-900 max-w-xs">
-                      <div>{o.customer_name}</div>
-                      <div className="text-[11px] text-[#2563EB] font-semibold">{o.phone}</div>
-                      <div className="text-[10px] text-slate-400 font-normal truncate">{o.address}</div>
-                    </td>
+                  return (
+                    <tr key={o.id} className="hover:bg-slate-50/80 transition relative">
+                      <td className="py-4 px-4 font-bold text-[#2563EB] font-mono">
+                        <div>{o.order_number}</div>
+                        <div className="text-[10px] text-slate-400 font-normal">{o.date}</div>
+                      </td>
 
-                    <td className="py-4 px-4 text-slate-700 font-medium">
-                      {o.items}
-                    </td>
+                      <td className="py-4 px-4 font-bold text-slate-900 max-w-xs">
+                        <div>{o.customer_name}</div>
+                        <div className="text-[11px] text-[#2563EB] font-semibold">{o.phone}</div>
+                        <div className="text-[10px] text-slate-400 font-normal truncate">{o.address}</div>
+                      </td>
 
-                    <td className="py-4 px-4 font-extrabold text-[#0B1220]">
-                      ৳{o.amount.toLocaleString()}
-                    </td>
+                      <td className="py-4 px-4 text-slate-700 font-medium">
+                        {o.items}
+                      </td>
 
-                    <td className="py-4 px-4">
-                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold px-2.5 py-0.5 rounded-md text-[11px] inline-block mb-1">
-                        {o.payment_method}
-                      </span>
-                      <div>
-                        <code className="text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
-                          {o.trx_id}
-                        </code>
-                      </div>
-                    </td>
+                      <td className="py-4 px-4 font-extrabold text-[#0B1220]">
+                        ৳{o.amount.toLocaleString()}
+                      </td>
 
-                    <td className="py-4 px-4">
-                      <span className={`font-extrabold px-3 py-1 rounded-full text-[11px] inline-block border ${
-                        o.status === 'Delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        o.status === 'Verified' ? 'bg-blue-50 text-[#2563EB] border-blue-200' :
-                        o.status === 'Shipped' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        o.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                        'bg-slate-100 text-slate-700 border-slate-200'
-                      }`}>
-                        {o.status}
-                      </span>
-                    </td>
+                      <td className="py-4 px-4">
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold px-2.5 py-0.5 rounded-md text-[11px] inline-block mb-1">
+                          {o.payment_method}
+                        </span>
+                        <div>
+                          <code className="text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
+                            {o.trx_id}
+                          </code>
+                        </div>
+                      </td>
 
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                        {/* Status Progression Buttons */}
-                        {o.status === 'Pending' && (
+                      <td className="py-4 px-4">
+                        <span className={`font-extrabold px-3 py-1 rounded-full text-[11px] inline-flex items-center gap-1 border ${currentStatusCfg.bg} ${currentStatusCfg.color} ${currentStatusCfg.border}`}>
+                          <StatusIcon className="w-3 h-3" />
+                          <span>{o.status}</span>
+                        </span>
+                      </td>
+
+                      {/* Action Dropdown / Popup Box */}
+                      <td className="py-4 px-4 text-right relative">
+                        <div className="inline-block text-left">
                           <button
-                            onClick={() => updateOrderStatus(o.id, 'Verified', o.order_number)}
-                            className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1"
-                            title="Approve & Verify Order"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Approve</span>
-                          </button>
-                        )}
-                        {o.status === 'Verified' && (
-                          <button
-                            onClick={() => updateOrderStatus(o.id, 'Shipped', o.order_number)}
-                            className="px-3 py-1 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs shadow-sm transition flex items-center gap-1"
-                            title="Mark Order as Shipped"
-                          >
-                            <Truck className="w-3.5 h-3.5" />
-                            <span>Ship</span>
-                          </button>
-                        )}
-                        {o.status === 'Shipped' && (
-                          <button
-                            onClick={() => updateOrderStatus(o.id, 'Delivered', o.order_number)}
-                            className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1"
-                            title="Mark Order as Delivered"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Deliver</span>
-                          </button>
-                        )}
-
-                        {/* Cancel Button (For active orders) */}
-                        {o.status !== 'Cancelled' && o.status !== 'Delivered' && (
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to cancel order ${o.order_number}?`)) {
-                                updateOrderStatus(o.id, 'Cancelled', o.order_number);
-                              }
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActivePopupOrderId(isPopupOpen ? null : o.id);
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 font-bold text-xs transition flex items-center gap-1 shadow-sm"
-                            title="Cancel this order"
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs shadow-sm transition border ${
+                              isPopupOpen
+                                ? 'bg-[#0B1220] text-white border-[#0B1220]'
+                                : 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#2563EB] hover:text-white border-[#2563EB]/20'
+                            }`}
                           >
-                            <XCircle className="w-3.5 h-3.5" />
-                            <span>Cancel</span>
+                            <span>Action</span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isPopupOpen ? 'rotate-180' : ''}`} />
                           </button>
-                        )}
 
-                        {/* Restore Button (For cancelled orders) */}
-                        {o.status === 'Cancelled' && (
-                          <button
-                            onClick={() => updateOrderStatus(o.id, 'Pending', o.order_number)}
-                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs transition flex items-center gap-1"
-                            title="Restore order to Pending"
-                          >
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            <span>Restore</span>
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {/* Popup Menu Card */}
+                          <AnimatePresence>
+                            {isPopupOpen && (
+                              <>
+                                {/* Click-away Backdrop */}
+                                <div
+                                  className="fixed inset-0 z-40"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActivePopupOrderId(null);
+                                  }}
+                                />
+
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                                  transition={{ duration: 0.12 }}
+                                  className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 z-50 text-left"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between mb-1">
+                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                                      Update Order Status
+                                    </span>
+                                    <button
+                                      onClick={() => setActivePopupOrderId(null)}
+                                      className="text-slate-400 hover:text-slate-600 p-0.5 rounded-md"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+
+                                  <div className="space-y-0.5">
+                                    {/* 1. Pending */}
+                                    <button
+                                      onClick={() => updateOrderStatus(o.id, 'Pending', o.order_number)}
+                                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                                        o.status === 'Pending'
+                                          ? 'bg-amber-50 text-amber-800'
+                                          : 'text-slate-700 hover:bg-amber-50 hover:text-amber-800'
+                                      }`}
+                                    >
+                                      <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+                                      <span className="flex-1">Pending</span>
+                                      {o.status === 'Pending' && <Check className="w-3.5 h-3.5 text-amber-600" />}
+                                    </button>
+
+                                    {/* 2. Approve / Verified */}
+                                    <button
+                                      onClick={() => updateOrderStatus(o.id, 'Verified', o.order_number)}
+                                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                                        o.status === 'Verified'
+                                          ? 'bg-blue-50 text-[#2563EB]'
+                                          : 'text-slate-700 hover:bg-blue-50 hover:text-[#2563EB]'
+                                      }`}
+                                    >
+                                      <CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" />
+                                      <span className="flex-1">Approve / Verified</span>
+                                      {o.status === 'Verified' && <Check className="w-3.5 h-3.5 text-[#2563EB]" />}
+                                    </button>
+
+                                    {/* 3. Processing */}
+                                    <button
+                                      onClick={() => updateOrderStatus(o.id, 'Processing', o.order_number)}
+                                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                                        o.status === 'Processing'
+                                          ? 'bg-purple-50 text-purple-700'
+                                          : 'text-slate-700 hover:bg-purple-50 hover:text-purple-700'
+                                      }`}
+                                    >
+                                      <Package className="w-4 h-4 text-purple-600 shrink-0" />
+                                      <span className="flex-1">Processing</span>
+                                      {o.status === 'Processing' && <Check className="w-3.5 h-3.5 text-purple-600" />}
+                                    </button>
+
+                                    {/* 4. Shipped */}
+                                    <button
+                                      onClick={() => updateOrderStatus(o.id, 'Shipped', o.order_number)}
+                                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                                        o.status === 'Shipped'
+                                          ? 'bg-indigo-50 text-indigo-700'
+                                          : 'text-slate-700 hover:bg-indigo-50 hover:text-indigo-700'
+                                      }`}
+                                    >
+                                      <Truck className="w-4 h-4 text-indigo-600 shrink-0" />
+                                      <span className="flex-1">Shipped</span>
+                                      {o.status === 'Shipped' && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                                    </button>
+
+                                    {/* 5. Delivered */}
+                                    <button
+                                      onClick={() => updateOrderStatus(o.id, 'Delivered', o.order_number)}
+                                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                                        o.status === 'Delivered'
+                                          ? 'bg-emerald-50 text-emerald-700'
+                                          : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700'
+                                      }`}
+                                    >
+                                      <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                                      <span className="flex-1">Delivered</span>
+                                      {o.status === 'Delivered' && <Check className="w-3.5 h-3.5 text-emerald-600" />}
+                                    </button>
+
+                                    <div className="border-t border-slate-100 my-1" />
+
+                                    {/* 6. Cancel Order */}
+                                    <button
+                                      onClick={() => {
+                                        if (window.confirm(`Are you sure you want to cancel order ${o.order_number}?`)) {
+                                          updateOrderStatus(o.id, 'Cancelled', o.order_number);
+                                        }
+                                      }}
+                                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                                        o.status === 'Cancelled'
+                                          ? 'bg-rose-50 text-rose-700'
+                                          : 'text-rose-600 hover:bg-rose-50 hover:text-rose-700'
+                                      }`}
+                                    >
+                                      <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                                      <span className="flex-1">Cancel Order</span>
+                                      {o.status === 'Cancelled' && <Check className="w-3.5 h-3.5 text-rose-600" />}
+                                    </button>
+                                  </div>
+                                </motion.div>
+                              </>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -402,4 +548,5 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
+
 
