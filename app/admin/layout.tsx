@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -49,12 +48,12 @@ export default function AdminLayout({
           
           {/* Brand Logo Header */}
           <Link href="/admin" className="flex items-center gap-3 px-2 py-1">
-            <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-sm shrink-0 border border-slate-700">
-              <Image
+            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-sm shrink-0 border border-slate-700 bg-white flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/javed-shop-icon.png"
                 alt="Javed Shop"
-                fill
-                className="object-cover"
+                className="w-8 h-8 object-contain"
               />
             </div>
             <div className="flex flex-col">
@@ -122,8 +121,9 @@ export default function AdminLayout({
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <Link href="/admin" className="flex items-center gap-2">
-                  <div className="relative w-8 h-8 rounded-xl overflow-hidden">
-                    <Image src="/javed-shop-icon.png" alt="Javed Shop" fill className="object-cover" />
+                  <div className="w-8 h-8 rounded-xl overflow-hidden bg-white flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/javed-shop-icon.png" alt="Javed Shop" className="w-7 h-7 object-contain" />
                   </div>
                   <span className="font-extrabold text-sm text-white">JAVED SHOP</span>
                 </Link>
