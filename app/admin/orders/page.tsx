@@ -95,7 +95,7 @@ export default function AdminOrdersPage() {
   // Selected Order for updating tracking
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
-  // 1. Fetch Orders directly from Supabase
+  // 1. Fetch Orders directly from Supabase — no localStorage fallback to avoid stale data
   const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
@@ -105,15 +105,14 @@ export default function AdminOrdersPage() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      console.log('=== ADMIN ORDERS SUPABASE FETCH DIAGNOSTIC ===');
-      console.log('[Supabase Query Data]:', data);
-      console.log('[Supabase Query Error]:', error);
-
       if (error) {
-        console.error('Supabase query error:', error);
+        console.error('[Admin Orders] Supabase SELECT error:', error);
+        setActionNotice({ type: 'error', message: `Failed to load orders: ${error.message}` });
+        setTimeout(() => setActionNotice(null), 5000);
+        return;
       }
 
-      if (data && data.length > 0) {
+      if (data) {
         const mapped: OrderRecord[] = data.map((d: any) => {
           const rawStatus = (d.order_status || 'pending').toLowerCase();
           let formattedStatus: OrderRecord['status'] = 'Pending';
@@ -138,8 +137,6 @@ export default function AdminOrdersPage() {
                   day: '2-digit',
                   month: 'short',
                   year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
                 })
               : 'Recent',
             items: d.notes || 'Store Products',
@@ -148,22 +145,6 @@ export default function AdminOrdersPage() {
         });
 
         setOrders(mapped);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('javed_shop_orders', JSON.stringify(mapped));
-        }
-      } else {
-        // Fallback to localStorage if offline/empty
-        if (typeof window !== 'undefined') {
-          const stored = localStorage.getItem('javed_shop_orders');
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                setOrders(parsed);
-              }
-            } catch (e) {}
-          }
-        }
       }
 
       setLastRefreshed(
@@ -174,7 +155,9 @@ export default function AdminOrdersPage() {
         })
       );
     } catch (err: any) {
-      console.error('Error fetching orders:', err);
+      console.error('[Admin Orders] Unexpected error fetching orders:', err);
+      setActionNotice({ type: 'error', message: `Unexpected error: ${err?.message || 'Unknown'}` });
+      setTimeout(() => setActionNotice(null), 5000);
     } finally {
       setLoading(false);
     }
@@ -188,16 +171,18 @@ export default function AdminOrdersPage() {
     try {
       const supabase = createClient();
       channel = supabase
-        .channel('realtime:admin_orders_page_v2')
+        .channel('realtime:admin_orders_page_v3')
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'orders' },
-          () => {
+          (_payload: any) => {
             loadOrders();
           }
         )
         .subscribe();
-    } catch (e) {}
+    } catch (e) {
+      console.error('[Admin Orders] Realtime subscription error:', e);
+    }
 
     return () => {
       if (channel) {
@@ -206,37 +191,38 @@ export default function AdminOrdersPage() {
     };
   }, [loadOrders]);
 
-  // 3. Update Order Status in Supabase & Local State
+  // 3. Update Order Status in Supabase & optimistic local state
   const handleUpdateOrderStatus = async (order: OrderRecord, newStatus: OrderRecord['status']) => {
     setUpdatingOrderId(order.id);
     const dbStatus = newStatus.toLowerCase();
 
-    // Optimistic local update
-    const updatedList = orders.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o));
-    setOrders(updatedList);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('javed_shop_orders', JSON.stringify(updatedList));
-    }
+    // Optimistic UI update — reflect immediately in local state
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o)));
 
     try {
       const supabase = createClient();
+      // Use order_number (text) to avoid UUID type mismatch in .eq() filter
       const { error } = await supabase
         .from('orders')
-        .update({ 
+        .update({
           order_status: dbStatus,
-          payment_status: newStatus === 'Verified' || newStatus === 'Delivered' ? 'paid' : 'pending'
+          payment_status: newStatus === 'Verified' || newStatus === 'Delivered' ? 'paid' : 'pending',
         })
-        .or(`id.eq.${order.id},order_number.eq.${order.order_number}`);
+        .eq('order_number', order.order_number);
 
       if (error) {
-        console.error('Failed to update status in Supabase:', error);
-        setActionNotice({ type: 'error', message: `Database update failed: ${error.message}` });
+        console.error('[Admin Orders] Status update error:', error);
+        // Revert optimistic update on failure
+        setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: order.status } : o)));
+        setActionNotice({ type: 'error', message: `Update failed: ${error.message}` });
       } else {
-        setActionNotice({ type: 'success', message: `Order #${order.order_number} status updated to "${newStatus}"` });
+        setActionNotice({ type: 'success', message: `✓ Order #${order.order_number} → "${newStatus}"` });
       }
     } catch (err: any) {
-      console.error('Update status exception:', err);
-      setActionNotice({ type: 'error', message: `Error updating status: ${err?.message || 'Unknown error'}` });
+      console.error('[Admin Orders] Status update exception:', err);
+      // Revert optimistic update on exception
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: order.status } : o)));
+      setActionNotice({ type: 'error', message: `Error: ${err?.message || 'Unknown error'}` });
     } finally {
       setUpdatingOrderId(null);
       setTimeout(() => setActionNotice(null), 4000);
