@@ -90,7 +90,6 @@ export default function AdminOrdersPage() {
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lastRefreshed, setLastRefreshed] = useState<string>('');
   
   // Selected Order for updating tracking
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
@@ -154,14 +153,6 @@ export default function AdminOrdersPage() {
 
         setOrders(mapped);
       }
-
-      setLastRefreshed(
-        new Date().toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        })
-      );
     } catch (err: any) {
       console.error('[Admin Orders] Unexpected error fetching orders:', err);
       setActionNotice({ type: 'error', message: `Unexpected error: ${err?.message || 'Unknown'}` });
@@ -265,33 +256,16 @@ export default function AdminOrdersPage() {
           <p className="text-xs text-slate-500 font-medium">Verify payments, update order progression &amp; process cancellations in real-time</p>
         </div>
 
-        {/* Refresh & Search */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            onClick={() => loadOrders()}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-[#E5E7EB] text-slate-700 hover:text-[#2563EB] font-bold text-xs shadow-sm transition disabled:opacity-60"
-            title="Refresh order list from Supabase"
-          >
-            <RotateCw className={`w-3.5 h-3.5 text-[#2563EB] ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Refreshing…' : 'Refresh'}</span>
-            {lastRefreshed && (
-              <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">
-                ({lastRefreshed})
-              </span>
-            )}
-          </button>
-
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              placeholder="Search Order #, Phone, Name, TrxID..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-64 bg-white text-slate-900 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] shadow-sm"
-            />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3" />
-          </div>
+        {/* Search */}
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            placeholder="Search Order #, Phone, Name, TrxID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-64 bg-white text-slate-900 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] shadow-sm"
+          />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3" />
         </div>
       </div>
 
