@@ -131,10 +131,88 @@ export default function CheckoutPage() {
         </motion.div>
       )}
 
-      <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        {/* Left: Form Inputs & Payment */}
-        <div className="lg:col-span-8 space-y-5">
+        {/* Order Summary: 1st on mobile (order-1), Right column on desktop (lg:order-2) */}
+        <div className="lg:col-span-4 order-1 lg:order-2">
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 sticky top-24">
+            <h2 className="text-sm font-extrabold text-[#0B1220] border-b border-slate-100 pb-3 uppercase tracking-wider flex items-center justify-between">
+              <span>Order Summary</span>
+              <span className="bg-[#2563EB]/10 text-[#2563EB] text-xs px-2.5 py-0.5 rounded-full font-bold">
+                {cart.reduce((acc, i) => acc + i.quantity, 0)} Items
+              </span>
+            </h2>
+
+            {/* Product items with Image */}
+            <div className="space-y-3 max-h-72 overflow-y-auto pr-1 divide-y divide-slate-100">
+              {cart.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 pt-3 first:pt-0">
+                  <div className="w-14 h-14 rounded-xl bg-slate-50 border border-[#E5E7EB] overflow-hidden shrink-0 flex items-center justify-center p-1 relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.image || '/javed-shop-icon.png'}
+                      alt={item.title}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-[#0B1220] line-clamp-2 leading-snug">
+                      {item.title}
+                    </p>
+                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      Qty: <span className="font-bold text-slate-800">{item.quantity}</span> × ৳{((item.discount_price || item.price)).toLocaleString()}
+                    </p>
+                  </div>
+                  <span className="font-extrabold text-xs text-[#0B1220] shrink-0 text-right">
+                    ৳{((item.discount_price || item.price) * item.quantity).toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-slate-100 pt-3 space-y-2 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Items Subtotal</span>
+                <span className="font-bold text-[#0B1220]">৳{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Delivery Charge ({deliveryLocation === 'inside' ? 'Inside Dhaka' : 'Outside Dhaka'})</span>
+                <span className="font-bold text-[#25C55E]">৳{deliveryFee}</span>
+              </div>
+              <div className="border-t border-slate-100 pt-2.5 flex justify-between text-sm">
+                <span className="font-extrabold text-[#0B1220]">Grand Total</span>
+                <span className="font-extrabold text-[#2563EB] text-base">
+                  ৳{grandTotal.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Desktop / Default Place Order Button */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              type="submit"
+              disabled={submitting}
+              className="hidden lg:flex w-full py-3.5 rounded-xl bg-[#2563EB] text-white font-bold text-sm hover:bg-[#1D4ED8] transition items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              {submitting ? (
+                <span>Confirming Order...</span>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Place Order Now</span>
+                </>
+              )}
+            </motion.button>
+
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#25C55E] shrink-0" />
+              <span>100% Genuine Quality Guarantee</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Shipping Form & Payment: 2nd on mobile (order-2), Left column on desktop (lg:order-1) */}
+        <div className="lg:col-span-8 order-2 lg:order-1 space-y-5">
 
           {/* 1. Delivery Information */}
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
@@ -294,66 +372,26 @@ export default function CheckoutPage() {
             )}
 
           </div>
-        </div>
 
-        {/* Right: Order Summary */}
-        <div className="lg:col-span-4">
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm space-y-4 sticky top-24">
-            <h2 className="text-sm font-extrabold text-[#0B1220] border-b border-slate-100 pb-3 uppercase tracking-wider">
-              Order Summary ({cart.length})
-            </h2>
-
-            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-              {cart.map((item) => (
-                <div key={item.id} className="flex items-center justify-between text-xs">
-                  <span className="text-slate-600 line-clamp-1 flex-1 font-medium">
-                    {item.quantity}× {item.title}
-                  </span>
-                  <span className="font-bold text-[#0B1220] ml-2">
-                    ৳{((item.discount_price || item.price) * item.quantity).toLocaleString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t border-slate-100 pt-3 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-600">
-                <span>Items Subtotal</span>
-                <span className="font-bold text-[#0B1220]">৳{subtotal.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Delivery Charge</span>
-                <span className="font-bold text-[#25C55E]">৳{deliveryFee}</span>
-              </div>
-              <div className="border-t border-slate-100 pt-2.5 flex justify-between text-sm">
-                <span className="font-extrabold text-[#0B1220]">Grand Total</span>
-                <span className="font-extrabold text-[#2563EB] text-base">
-                  ৳{grandTotal.toLocaleString()}
-                </span>
-              </div>
-            </div>
-
+          {/* Mobile Place Order Submit Button (Bottom of form for convenient mobile tapping) */}
+          <div className="lg:hidden pt-2">
             <motion.button
               whileTap={{ scale: 0.97 }}
               type="submit"
               disabled={submitting}
-              className="w-full py-3.5 rounded-xl bg-[#2563EB] text-white font-bold text-sm hover:bg-[#1D4ED8] transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+              className="w-full py-4 rounded-xl bg-[#2563EB] text-white font-extrabold text-sm hover:bg-[#1D4ED8] transition flex items-center justify-center gap-2 shadow-lg shadow-[#2563EB]/25 disabled:opacity-50"
             >
               {submitting ? (
                 <span>Confirming Order...</span>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Place Order Now</span>
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Place Order Now · ৳{grandTotal.toLocaleString()}</span>
                 </>
               )}
             </motion.button>
-
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 pt-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#25C55E] shrink-0" />
-              <span>100% Genuine Quality Guarantee</span>
-            </div>
           </div>
+
         </div>
 
       </form>
