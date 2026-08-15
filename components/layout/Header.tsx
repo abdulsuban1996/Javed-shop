@@ -116,7 +116,7 @@ export default function Header() {
               <img
                 src={logoSrc}
                 alt={settings.storeName || 'JAVED SHOP'}
-                className="h-10 sm:h-12 lg:h-14 w-auto object-contain group-hover:opacity-95 transition"
+                className="h-12 sm:h-14 lg:h-16 w-auto object-contain group-hover:opacity-95 transition"
                 fetchPriority="high"
               />
             </Link>
