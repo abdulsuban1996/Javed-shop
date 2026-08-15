@@ -111,12 +111,12 @@ export default function Header() {
             </button>
 
             {/* Brand Logo - Using plain img for guaranteed rendering */}
-            <Link href="/" className="flex items-center shrink-0 group py-0.5">
+            <Link href="/" className="flex items-center justify-center shrink-0 group py-0.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={logoSrc}
                 alt={settings.storeName || 'JAVED SHOP'}
-                className="h-12 sm:h-14 lg:h-16 w-auto object-contain group-hover:opacity-95 transition"
+                className="h-16 sm:h-16 lg:h-18 w-auto object-contain group-hover:opacity-95 transition"
                 fetchPriority="high"
               />
             </Link>
