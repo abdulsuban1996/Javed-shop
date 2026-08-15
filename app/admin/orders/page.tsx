@@ -95,6 +95,14 @@ export default function AdminOrdersPage() {
   // Selected Order for updating tracking
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
+  // Clear any stale localStorage cache on mount — prevent old mock data from showing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('javed_shop_orders');
+    }
+  }, []);
+
+
   // 1. Fetch Orders directly from Supabase — no localStorage fallback to avoid stale data
   const loadOrders = useCallback(async () => {
     setLoading(true);
