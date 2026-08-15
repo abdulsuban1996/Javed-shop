@@ -38,7 +38,26 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setErrorMsg('');
     const orderNumber = `JS-${Date.now().toString().slice(-6)}`;
+    const newOrderObj = {
+      id: Date.now().toString(),
+      order_number: orderNumber,
+      customer_name: formData.name,
+      customer_phone: formData.phone,
+      customer_address: `${formData.address}${formData.thana ? ', ' + formData.thana : ''}${formData.district ? ', ' + formData.district : ''}`,
+      amount: grandTotal,
+      payment_method: paymentMethod.toUpperCase(),
+      trx_id: paymentMethod === 'cod' ? 'COD' : trxId,
+      status: 'Pending',
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      items: cart.map((i) => `${i.title} (x${i.quantity})`).join(', '),
+    };
+
     try {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('javed_shop_orders');
+        const existing = stored ? JSON.parse(stored) : [];
+        localStorage.setItem('javed_shop_orders', JSON.stringify([newOrderObj, ...existing]));
+      }
       const supabase = createClient();
       await supabase.from('orders').insert({
         order_number: orderNumber,

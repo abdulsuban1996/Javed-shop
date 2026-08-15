@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
@@ -13,55 +13,142 @@ import {
   Clock, 
   ArrowRight,
   Eye,
-  Check
+  Check,
+  RotateCw
 } from 'lucide-react';
+import { createClient } from '../../lib/supabase/client';
+
+const DEFAULT_ORDERS = [
+  { 
+    id: '1', 
+    order_number: 'JS-20260806-2991', 
+    customer_name: 'Saddam Hossen', 
+    phone: '01854213620', 
+    amount: 310, 
+    payment_method: 'COD', 
+    trx_id: 'COD',
+    status: 'Delivered', 
+    payment_status: 'Verified',
+    date: '06 Aug 2026' 
+  },
+  { 
+    id: '2', 
+    order_number: 'JS-20260811-9841', 
+    customer_name: 'Tanvir Ahmed', 
+    phone: '01712345678', 
+    amount: 1550, 
+    payment_method: 'BKASH', 
+    trx_id: '9J48XK20L',
+    status: 'Pending', 
+    payment_status: 'Verification Pending',
+    date: '11 Aug 2026' 
+  },
+  { 
+    id: '3', 
+    order_number: 'JS-20260811-7743', 
+    customer_name: 'Siam Hossain', 
+    phone: '01898765432', 
+    amount: 2490, 
+    payment_method: 'NAGAD', 
+    trx_id: 'NGD88329X',
+    status: 'Verified', 
+    payment_status: 'Verified',
+    date: '11 Aug 2026' 
+  },
+];
 
 export default function AdminDashboardPage() {
-  const [orders, setOrders] = useState([
-    { 
-      id: '1', 
-      order_number: 'JS-20260806-2991', 
-      customer_name: 'Saddam Hossen', 
-      phone: '01854213620', 
-      amount: 310, 
-      payment_method: 'COD', 
-      trx_id: 'COD',
-      status: 'Delivered', 
-      payment_status: 'Verified',
-      date: '06 Aug 2026' 
-    },
-    { 
-      id: '2', 
-      order_number: 'JS-20260811-9841', 
-      customer_name: 'Tanvir Ahmed', 
-      phone: '01712345678', 
-      amount: 1550, 
-      payment_method: 'bKash', 
-      trx_id: '9J48XK20L',
-      status: 'Pending', 
-      payment_status: 'Verification Pending',
-      date: '11 Aug 2026' 
-    },
-    { 
-      id: '3', 
-      order_number: 'JS-20260811-7743', 
-      customer_name: 'Siam Hossain', 
-      phone: '01898765432', 
-      amount: 2490, 
-      payment_method: 'Nagad', 
-      trx_id: 'NGD88329X',
-      status: 'Verified', 
-      payment_status: 'Verified',
-      date: '11 Aug 2026' 
-    },
-  ]);
+  const [orders, setOrders] = useState(DEFAULT_ORDERS);
+  const [loading, setLoading] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<string>('');
 
-  const verifyOrder = (id: string) => {
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === id ? { ...o, status: 'Verified', payment_status: 'Verified' } : o
-      )
+  const loadOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      let currentOrders = [...DEFAULT_ORDERS];
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('javed_shop_orders');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              currentOrders = parsed;
+            }
+          } catch (e) {}
+        }
+      }
+
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const mapped = data.map((d: any) => ({
+            id: d.id?.toString() || d.order_number,
+            order_number: d.order_number || `JS-${d.id}`,
+            customer_name: d.customer_name || 'Customer',
+            phone: d.customer_phone || '',
+            amount: Number(d.total_amount) || Number(d.subtotal) || 0,
+            payment_method: (d.payment_method || 'COD').toUpperCase(),
+            trx_id: d.trx_id || 'COD',
+            status: d.order_status
+              ? d.order_status.charAt(0).toUpperCase() + d.order_status.slice(1)
+              : 'Pending',
+            payment_status: d.payment_status || 'Pending',
+            date: d.created_at
+              ? new Date(d.created_at).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                })
+              : 'Today',
+          }));
+
+          const existingNums = new Set(mapped.map((m: any) => m.order_number));
+          const leftovers = currentOrders.filter((o) => !existingNums.has(o.order_number));
+          currentOrders = [...mapped, ...leftovers];
+
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('javed_shop_orders', JSON.stringify(currentOrders));
+          }
+        }
+      } catch (err) {}
+
+      setOrders(currentOrders);
+      setLastRefreshed(
+        new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  const verifyOrder = async (id: string, orderNumber: string) => {
+    const updated = orders.map((o) =>
+      o.id === id ? { ...o, status: 'Verified', payment_status: 'Verified' } : o
     );
+    setOrders(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('javed_shop_orders', JSON.stringify(updated));
+    }
+    try {
+      const supabase = createClient();
+      await supabase
+        .from('orders')
+        .update({ order_status: 'verified', payment_status: 'verified' })
+        .eq('order_number', orderNumber);
+    } catch (e) {}
   };
 
   // Status Counts
@@ -74,14 +161,31 @@ export default function AdminDashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-7">
       
-      {/* Header Title */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Dashboard
-        </h1>
-        <p className="text-sm text-slate-500 font-medium">
-          Welcome back! Here&#39;s what&#39;s happening with Javed Shop today.
-        </p>
+      {/* Header Title & Refresh Button */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Dashboard
+          </h1>
+          <p className="text-sm text-slate-500 font-medium">
+            Welcome back! Here&#39;s what&#39;s happening with Javed Shop today.
+          </p>
+        </div>
+
+        <button
+          onClick={() => loadOrders()}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#2563EB] font-bold text-xs shadow-sm transition disabled:opacity-60 self-start sm:self-auto"
+          title="Refresh dashboard stats now"
+        >
+          <RotateCw className={`w-4 h-4 text-[#2563EB] ${loading ? 'animate-spin' : ''}`} />
+          <span>{loading ? 'Refreshing…' : 'Refresh Dashboard'}</span>
+          {lastRefreshed && (
+            <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">
+              ({lastRefreshed})
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Top 4 Vibrant Metric Cards matching screenshot */}
@@ -283,15 +387,18 @@ export default function AdminDashboardPage() {
                   <td className="py-4 px-3 text-right">
                     {o.status === 'Pending' ? (
                       <button
-                        onClick={() => verifyOrder(o.id)}
-                        className="px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm"
+                        onClick={() => verifyOrder(o.id, o.order_number)}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm"
                       >
                         Approve
                       </button>
                     ) : (
-                      <button className="px-3.5 py-1.5 rounded-full border border-purple-200 text-purple-700 hover:bg-purple-50 font-bold text-xs transition">
+                      <Link
+                        href="/admin/orders"
+                        className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition inline-block"
+                      >
                         View
-                      </button>
+                      </Link>
                     )}
                   </td>
                 </tr>

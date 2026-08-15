@@ -1,73 +1,162 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Search, CheckCircle2, Clock, Truck, XCircle, RefreshCw, Check, AlertCircle } from 'lucide-react';
+import { ShoppingBag, Search, CheckCircle2, Clock, Truck, XCircle, RefreshCw, Check, AlertCircle, RotateCw } from 'lucide-react';
+import { createClient } from '../../../lib/supabase/client';
+
+const DEFAULT_ORDERS = [
+  {
+    id: '1',
+    order_number: 'JS-20260806-2991',
+    customer_name: 'Saddam Hossen',
+    phone: '01854213620',
+    address: 'House 42, Road 11, Uttara, Dhaka',
+    amount: 310,
+    payment_method: 'COD',
+    trx_id: 'COD',
+    status: 'Delivered',
+    date: '06 Aug 2026',
+    items: 'Aultima TWS Earbuds (x1)',
+  },
+  {
+    id: '2',
+    order_number: 'JS-20260811-9841',
+    customer_name: 'Tanvir Ahmed',
+    phone: '01712345678',
+    address: 'GEC Circle, Chittagong',
+    amount: 1550,
+    payment_method: 'BKASH',
+    trx_id: '9J48XK20L',
+    status: 'Pending',
+    date: '11 Aug 2026',
+    items: 'Ultra Smartwatch 8 Series (x1)',
+  },
+  {
+    id: '3',
+    order_number: 'JS-20260811-7743',
+    customer_name: 'Siam Hossain',
+    phone: '01898765432',
+    address: 'Zindabazar, Sylhet',
+    amount: 2490,
+    payment_method: 'NAGAD',
+    trx_id: 'NGD88329X',
+    status: 'Verified',
+    date: '11 Aug 2026',
+    items: 'JBL Style Speaker (x1)',
+  },
+  {
+    id: '4',
+    order_number: 'JS-20260811-1209',
+    customer_name: 'Rahim Uddin',
+    phone: '01911223344',
+    address: 'Dhanmondi 27, Dhaka',
+    amount: 1850,
+    payment_method: 'ROCKET',
+    trx_id: 'RKT554900',
+    status: 'Shipped',
+    date: '11 Aug 2026',
+    items: 'MagSafe Wireless Powerbank (x1)',
+  },
+];
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Verified' | 'Shipped' | 'Delivered' | 'Cancelled'>('All');
   const [search, setSearch] = useState('');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [orders, setOrders] = useState(DEFAULT_ORDERS);
+  const [loading, setLoading] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<string>('');
 
-  const [orders, setOrders] = useState([
-    {
-      id: '1',
-      order_number: 'JS-20260806-2991',
-      customer_name: 'Saddam Hossen',
-      phone: '01854213620',
-      address: 'House 42, Road 11, Uttara, Dhaka',
-      amount: 310,
-      payment_method: 'COD',
-      trx_id: 'COD',
-      status: 'Delivered',
-      date: '06 Aug 2026',
-      items: 'Aultima TWS Earbuds (x1)',
-    },
-    {
-      id: '2',
-      order_number: 'JS-20260811-9841',
-      customer_name: 'Tanvir Ahmed',
-      phone: '01712345678',
-      address: 'GEC Circle, Chittagong',
-      amount: 1550,
-      payment_method: 'bKash',
-      trx_id: '9J48XK20L',
-      status: 'Pending',
-      date: '11 Aug 2026',
-      items: 'Ultra Smartwatch 8 Series (x1)',
-    },
-    {
-      id: '3',
-      order_number: 'JS-20260811-7743',
-      customer_name: 'Siam Hossain',
-      phone: '01898765432',
-      address: 'Zindabazar, Sylhet',
-      amount: 2490,
-      payment_method: 'Nagad',
-      trx_id: 'NGD88329X',
-      status: 'Verified',
-      date: '11 Aug 2026',
-      items: 'JBL Style Speaker (x1)',
-    },
-    {
-      id: '4',
-      order_number: 'JS-20260811-1209',
-      customer_name: 'Rahim Uddin',
-      phone: '01911223344',
-      address: 'Dhanmondi 27, Dhaka',
-      amount: 1850,
-      payment_method: 'Rocket',
-      trx_id: 'RKT554900',
-      status: 'Shipped',
-      date: '11 Aug 2026',
-      items: 'MagSafe Wireless Powerbank (x1)',
-    },
-  ]);
+  const loadOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      let currentOrders = [...DEFAULT_ORDERS];
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('javed_shop_orders');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              currentOrders = parsed;
+            }
+          } catch (e) {}
+        }
+      }
 
-  const updateOrderStatus = (id: string, newStatus: string, orderNumber: string) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
-    );
+      // Query Supabase for real orders
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const mapped = data.map((d: any) => ({
+            id: d.id?.toString() || d.order_number,
+            order_number: d.order_number || `JS-${d.id}`,
+            customer_name: d.customer_name || 'Customer',
+            phone: d.customer_phone || '',
+            address: d.customer_address || `${d.thana || ''} ${d.district || ''}`,
+            amount: Number(d.total_amount) || Number(d.subtotal) || 0,
+            payment_method: (d.payment_method || 'COD').toUpperCase(),
+            trx_id: d.trx_id || 'COD',
+            status: d.order_status
+              ? d.order_status.charAt(0).toUpperCase() + d.order_status.slice(1)
+              : 'Pending',
+            date: d.created_at
+              ? new Date(d.created_at).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                })
+              : 'Today',
+            items: d.notes || 'Store Products',
+          }));
+
+          // Merge: Put Supabase orders first, followed by unique stored/mock ones
+          const existingNums = new Set(mapped.map((m: any) => m.order_number));
+          const leftovers = currentOrders.filter((o) => !existingNums.has(o.order_number));
+          currentOrders = [...mapped, ...leftovers];
+
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('javed_shop_orders', JSON.stringify(currentOrders));
+          }
+        }
+      } catch (err) {}
+
+      setOrders(currentOrders);
+      setLastRefreshed(
+        new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  const updateOrderStatus = async (id: string, newStatus: string, orderNumber: string) => {
+    const updated = orders.map((o) => (o.id === id ? { ...o, status: newStatus } : o));
+    setOrders(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('javed_shop_orders', JSON.stringify(updated));
+    }
+    try {
+      const supabase = createClient();
+      await supabase
+        .from('orders')
+        .update({ order_status: newStatus.toLowerCase() })
+        .eq('order_number', orderNumber);
+    } catch (e) {}
+
     setActionNotice(`Order #${orderNumber} marked as ${newStatus}`);
     setTimeout(() => {
       setActionNotice(null);
@@ -101,16 +190,33 @@ export default function AdminOrdersPage() {
           <p className="text-xs text-slate-500 font-medium">Verify payments, manage order status &amp; process cancellations</p>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            placeholder="Search Order #, Phone, Name, TrxID..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-72 bg-white text-slate-900 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] shadow-sm"
-          />
-          <Search className="w-4 h-4 text-slate-400 absolute left-3" />
+        {/* Right Header Actions: Refresh & Search Bar */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={() => loadOrders()}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-[#E5E7EB] text-slate-700 hover:text-[#2563EB] font-bold text-xs shadow-sm transition disabled:opacity-60"
+            title="Refresh order list now"
+          >
+            <RotateCw className={`w-3.5 h-3.5 text-[#2563EB] ${loading ? 'animate-spin' : ''}`} />
+            <span>{loading ? 'Refreshing…' : 'Refresh'}</span>
+            {lastRefreshed && (
+              <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">
+                ({lastRefreshed})
+              </span>
+            )}
+          </button>
+
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              placeholder="Search Order #, Phone, Name, TrxID..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-64 bg-white text-slate-900 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] shadow-sm"
+            />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3" />
+          </div>
         </div>
       </div>
 
