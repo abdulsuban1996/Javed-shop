@@ -133,22 +133,20 @@ export default function AdminSettingsPage() {
     }
   }, [settings]);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
-    updateSettings({
+    await updateSettings({
       storeName, tagline,
       logo: logos[0] || '/javed-shop-logo.png',
       favicon: favicons[0] || '/javed-shop-icon.png',
       email, hotline, whatsapp, address,
       facebookUrl, instagramUrl, youtubeUrl, clearanceNotice,
     });
-    setTimeout(() => {
-      setSaving(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 4000);
-    }, 500);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 4000);
   };
 
   return (

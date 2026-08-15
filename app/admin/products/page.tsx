@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -120,21 +120,47 @@ export default function AdminProductsPage() {
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
 
-  // Fetch products from Supabase on mount
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) {
-          setProducts(data as ProductItem[]);
-        }
-      } catch (e) {
-        console.error('Fetch error:', e);
+  const fetchProducts = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        setProducts(data as ProductItem[]);
       }
+    } catch (e) {
+      console.error('Fetch error:', e);
     }
-    fetchProducts();
   }, []);
+
+  // Fetch products from Supabase on mount and subscribe to Realtime
+  useEffect(() => {
+    fetchProducts();
+
+    let channel: any = null;
+    try {
+      const supabase = createClient();
+      channel = supabase
+        .channel('realtime:admin_products')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'products' },
+          () => {
+            fetchProducts();
+          }
+        )
+        .subscribe();
+    } catch (e) {}
+
+    return () => {
+      if (channel) {
+        channel.unsubscribe();
+      }
+    };
+  }, [fetchProducts]);
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,24 +174,12 @@ export default function AdminProductsPage() {
       ? images
       : ['https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&auto=format&fit=crop'];
 
-    const newProduct: ProductItem = {
-      id: editingId || `p_${Date.now()}`,
-      title,
-      slug,
-      price: parseFloat(price),
-      discount_price: discountPrice ? parseFloat(discountPrice) : null,
-      stock: parseInt(stock, 10),
-      images: finalImages,
-      is_deal_of_day: isDeal,
-      is_flash_sale: isFlash,
-    };
-
     try {
       const supabase = createClient();
 
       if (editingId) {
         // Update existing product in Supabase
-        await supabase
+        const { error } = await supabase
           .from('products')
           .update({
             title,
@@ -179,11 +193,17 @@ export default function AdminProductsPage() {
           })
           .eq('id', editingId);
 
-        setProducts((prev) => prev.map((p) => (p.id === editingId ? newProduct : p)));
+        if (error) {
+          console.error('Update product error:', error);
+          setStatusMsg(`Update failed: ${error.message}`);
+          return;
+        }
+
+        await fetchProducts();
         setStatusMsg('Product updated successfully!');
       } else {
         // Insert new product into Supabase
-        await supabase.from('products').insert({
+        const { error } = await supabase.from('products').insert({
           title,
           slug,
           price: parseFloat(price),
@@ -194,22 +214,21 @@ export default function AdminProductsPage() {
           is_flash_sale: isFlash,
         });
 
-        setProducts((prev) => [newProduct, ...prev]);
+        if (error) {
+          console.error('Insert product error:', error);
+          setStatusMsg(`Create failed: ${error.message}`);
+          return;
+        }
+
+        await fetchProducts();
         setStatusMsg('New product published successfully!');
       }
 
       resetForm();
       setActiveTab('catalog');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      if (editingId) {
-        setProducts((prev) => prev.map((p) => (p.id === editingId ? newProduct : p)));
-      } else {
-        setProducts((prev) => [newProduct, ...prev]);
-      }
-      setStatusMsg('Changes saved to product catalog!');
-      resetForm();
-      setActiveTab('catalog');
+      setStatusMsg(`Error saving product: ${err?.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
@@ -230,14 +249,19 @@ export default function AdminProductsPage() {
   const handleDeleteProduct = async (id: string, title: string) => {
     if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
 
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-
     try {
       const supabase = createClient();
-      await supabase.from('products').delete().eq('id', id);
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) {
+        console.error('Delete error:', error);
+        setStatusMsg(`Delete failed: ${error.message}`);
+        return;
+      }
+      await fetchProducts();
       setStatusMsg(`Product "${title}" deleted successfully!`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setStatusMsg(`Error deleting product: ${err?.message || 'Unknown error'}`);
     }
   };
 

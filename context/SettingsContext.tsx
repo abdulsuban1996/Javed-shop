@@ -16,6 +16,11 @@ export interface SiteSettings {
   instagramUrl: string;
   youtubeUrl: string;
   clearanceNotice: string;
+  bkashNumber: string;
+  nagadNumber: string;
+  rocketNumber: string;
+  insideDhakaFee: number;
+  outsideDhakaFee: number;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -31,16 +36,21 @@ const DEFAULT_SETTINGS: SiteSettings = {
   instagramUrl: 'https://instagram.com/javedshopbd',
   youtubeUrl: 'https://youtube.com/@javedshopbd',
   clearanceNotice: 'Smart Products. Better Everyday. | Nationwide Delivery',
+  bkashNumber: '01700-000000',
+  nagadNumber: '01800-000000',
+  rocketNumber: '01900-000000',
+  insideDhakaFee: 60,
+  outsideDhakaFee: 120,
 };
 
 interface SettingsContextType {
   settings: SiteSettings;
-  updateSettings: (newSettings: Partial<SiteSettings>) => void;
+  updateSettings: (newSettings: Partial<SiteSettings>) => Promise<void>;
 }
 
 const SettingsContext = createContext<SettingsContextType>({
   settings: DEFAULT_SETTINGS,
-  updateSettings: () => {},
+  updateSettings: async () => {},
 });
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
@@ -76,18 +86,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
         if (!error && data) {
           const cloudSettings: Partial<SiteSettings> = {
-            storeName: data.store_name || DEFAULT_SETTINGS.storeName,
-            tagline: data.tagline || DEFAULT_SETTINGS.tagline,
+            storeName: data.store_name ?? DEFAULT_SETTINGS.storeName,
+            tagline: data.tagline ?? DEFAULT_SETTINGS.tagline,
             logo: data.logo || DEFAULT_SETTINGS.logo,
             favicon: data.favicon || DEFAULT_SETTINGS.favicon,
-            email: data.email || DEFAULT_SETTINGS.email,
-            hotline: data.hotline || DEFAULT_SETTINGS.hotline,
-            whatsapp: data.whatsapp || DEFAULT_SETTINGS.whatsapp,
-            address: data.address || DEFAULT_SETTINGS.address,
-            facebookUrl: data.facebook_url || DEFAULT_SETTINGS.facebookUrl,
-            instagramUrl: data.instagram_url || DEFAULT_SETTINGS.instagramUrl,
-            youtubeUrl: data.youtube_url || DEFAULT_SETTINGS.youtubeUrl,
-            clearanceNotice: data.clearance_notice || DEFAULT_SETTINGS.clearanceNotice,
+            email: data.email ?? DEFAULT_SETTINGS.email,
+            hotline: data.hotline ?? DEFAULT_SETTINGS.hotline,
+            whatsapp: data.whatsapp ?? DEFAULT_SETTINGS.whatsapp,
+            address: data.address ?? DEFAULT_SETTINGS.address,
+            facebookUrl: data.facebook_url ?? DEFAULT_SETTINGS.facebookUrl,
+            instagramUrl: data.instagram_url ?? DEFAULT_SETTINGS.instagramUrl,
+            youtubeUrl: data.youtube_url ?? DEFAULT_SETTINGS.youtubeUrl,
+            clearanceNotice: data.clearance_notice ?? DEFAULT_SETTINGS.clearanceNotice,
+            bkashNumber: data.bkash_number ?? DEFAULT_SETTINGS.bkashNumber,
+            nagadNumber: data.nagad_number ?? DEFAULT_SETTINGS.nagadNumber,
+            rocketNumber: data.rocket_number ?? DEFAULT_SETTINGS.rocketNumber,
+            insideDhakaFee: data.inside_dhaka_fee != null ? Number(data.inside_dhaka_fee) : DEFAULT_SETTINGS.insideDhakaFee,
+            outsideDhakaFee: data.outside_dhaka_fee != null ? Number(data.outside_dhaka_fee) : DEFAULT_SETTINGS.outsideDhakaFee,
           };
 
           setSettings((prev) => {
@@ -103,7 +118,51 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     fetchSupabaseSettings();
 
-    // 3. Storage event listeners
+    // 3. Supabase Realtime channel for site_settings
+    let channel: any = null;
+    try {
+      const supabase = createClient();
+      channel = supabase
+        .channel('realtime:site_settings')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'site_settings' },
+          (payload: any) => {
+            if (payload.new) {
+              const d = payload.new;
+              setSettings((prev) => {
+                const updated: SiteSettings = {
+                  ...prev,
+                  storeName: d.store_name ?? prev.storeName,
+                  tagline: d.tagline ?? prev.tagline,
+                  logo: d.logo || prev.logo,
+                  favicon: d.favicon || prev.favicon,
+                  email: d.email ?? prev.email,
+                  hotline: d.hotline ?? prev.hotline,
+                  whatsapp: d.whatsapp ?? prev.whatsapp,
+                  address: d.address ?? prev.address,
+                  facebookUrl: d.facebook_url ?? prev.facebookUrl,
+                  instagramUrl: d.instagram_url ?? prev.instagramUrl,
+                  youtubeUrl: d.youtube_url ?? prev.youtubeUrl,
+                  clearanceNotice: d.clearance_notice ?? prev.clearanceNotice,
+                  bkashNumber: d.bkash_number ?? prev.bkashNumber,
+                  nagadNumber: d.nagad_number ?? prev.nagadNumber,
+                  rocketNumber: d.rocket_number ?? prev.rocketNumber,
+                  insideDhakaFee: d.inside_dhaka_fee != null ? Number(d.inside_dhaka_fee) : prev.insideDhakaFee,
+                  outsideDhakaFee: d.outside_dhaka_fee != null ? Number(d.outside_dhaka_fee) : prev.outsideDhakaFee,
+                };
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('javed_shop_settings', JSON.stringify(updated));
+                }
+                return updated;
+              });
+            }
+          }
+        )
+        .subscribe();
+    } catch (e) {}
+
+    // 4. Storage event listeners
     if (typeof window !== 'undefined') {
       const handleStorageChange = () => {
         const updated = localStorage.getItem('javed_shop_settings');
@@ -127,16 +186,21 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       return () => {
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('javed_settings_updated', handleStorageChange);
+        if (channel) {
+          channel.unsubscribe();
+        }
       };
     }
   }, []);
 
   const updateSettings = async (newSettings: Partial<SiteSettings>) => {
+    let latest: SiteSettings = DEFAULT_SETTINGS;
     setSettings((prev) => {
       const updated = { ...prev, ...newSettings };
       if (!updated.logo || updated.logo.trim() === '') {
         updated.logo = '/javed-shop-logo.png';
       }
+      latest = updated;
       if (typeof window !== 'undefined') {
         localStorage.setItem('javed_shop_settings', JSON.stringify(updated));
         window.dispatchEvent(new Event('javed_settings_updated'));
@@ -149,18 +213,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       const supabase = createClient();
       await supabase.from('site_settings').upsert({
         id: 'default',
-        store_name: newSettings.storeName,
-        tagline: newSettings.tagline,
-        logo: newSettings.logo,
-        favicon: newSettings.favicon,
-        email: newSettings.email,
-        hotline: newSettings.hotline,
-        whatsapp: newSettings.whatsapp,
-        address: newSettings.address,
-        facebook_url: newSettings.facebookUrl,
-        instagram_url: newSettings.instagramUrl,
-        youtube_url: newSettings.youtubeUrl,
-        clearance_notice: newSettings.clearanceNotice,
+        store_name: latest.storeName,
+        tagline: latest.tagline,
+        logo: latest.logo,
+        favicon: latest.favicon,
+        email: latest.email,
+        hotline: latest.hotline,
+        whatsapp: latest.whatsapp,
+        address: latest.address,
+        facebook_url: latest.facebookUrl,
+        instagram_url: latest.instagramUrl,
+        youtube_url: latest.youtubeUrl,
+        clearance_notice: latest.clearanceNotice,
+        bkash_number: latest.bkashNumber,
+        nagad_number: latest.nagadNumber,
+        rocket_number: latest.rocketNumber,
+        inside_dhaka_fee: latest.insideDhakaFee,
+        outside_dhaka_fee: latest.outsideDhakaFee,
         updated_at: new Date().toISOString(),
       });
     } catch (e) {}

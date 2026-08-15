@@ -7,12 +7,15 @@ import { useCart } from '../../context/CartContext';
 import { ShieldCheck, Truck, CreditCard, CheckCircle2, AlertCircle, PhoneCall } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
 
+import { useSettings } from '../../context/SettingsContext';
+
 const inputClass = "w-full bg-white text-[#0B1220] rounded-xl p-3 border border-[#E5E7EB] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 transition text-xs sm:text-sm placeholder:text-slate-400";
 const labelClass = "text-xs font-bold text-slate-700 mb-1 block";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, subtotal, clearCart } = useCart();
+  const { settings } = useSettings();
 
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', division: 'Dhaka', district: 'Dhaka City', thana: '', notes: '' });
   const [paymentMethod, setPaymentMethod] = useState<'bkash' | 'nagad' | 'rocket' | 'cod'>('bkash');
@@ -22,7 +25,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const deliveryFee = deliveryLocation === 'inside' ? 60 : 120;
+  const deliveryFee = deliveryLocation === 'inside' ? (settings.insideDhakaFee || 60) : (settings.outsideDhakaFee || 120);
   const grandTotal = subtotal + deliveryFee;
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -38,6 +41,8 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setErrorMsg('');
     const orderNumber = `JS-${Date.now().toString().slice(-6)}`;
+    const itemsSummary = cart.map((i) => `${i.title} (x${i.quantity})`).join(', ');
+
     const newOrderObj = {
       id: Date.now().toString(),
       order_number: orderNumber,
@@ -49,7 +54,7 @@ export default function CheckoutPage() {
       trx_id: paymentMethod === 'cod' ? 'COD' : trxId,
       status: 'Pending',
       date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      items: cart.map((i) => `${i.title} (x${i.quantity})`).join(', '),
+      items: itemsSummary,
     };
 
     try {
@@ -58,8 +63,9 @@ export default function CheckoutPage() {
         const existing = stored ? JSON.parse(stored) : [];
         localStorage.setItem('javed_shop_orders', JSON.stringify([newOrderObj, ...existing]));
       }
+
       const supabase = createClient();
-      await supabase.from('orders').insert({
+      const { error: insertError } = await supabase.from('orders').insert({
         order_number: orderNumber,
         customer_name: formData.name,
         customer_phone: formData.phone,
@@ -74,11 +80,17 @@ export default function CheckoutPage() {
         trx_id: paymentMethod === 'cod' ? 'COD' : trxId,
         payment_status: paymentMethod === 'cod' ? 'pending' : 'verification_pending',
         order_status: 'pending',
-        notes: formData.notes,
+        notes: itemsSummary || formData.notes || '',
       });
+
+      if (insertError) {
+        console.error('Supabase order insert warning:', insertError);
+      }
+
       clearCart();
       router.push(`/order-success/${orderNumber}`);
     } catch (e) {
+      console.error('Order placement exception:', e);
       clearCart();
       router.push(`/order-success/${orderNumber}`);
     } finally {
@@ -232,7 +244,11 @@ export default function CheckoutPage() {
                     Payment Instructions for {paymentMethod.toUpperCase()}:
                   </p>
                   <p>1. Open your {paymentMethod.toUpperCase()} app &gt; Send Money.</p>
-                  <p>2. Merchant Personal Number: <strong className="text-[#0B1220] font-mono text-sm">01700-000000</strong></p>
+                  <p>
+                    2. {paymentMethod.toUpperCase()} Number: <strong className="text-[#0B1220] font-mono text-sm">
+                      {paymentMethod === 'bkash' ? (settings.bkashNumber || '01700-000000') : paymentMethod === 'nagad' ? (settings.nagadNumber || '01800-000000') : (settings.rocketNumber || '01900-000000')}
+                    </strong>
+                  </p>
                   <p>3. Exact Amount: <strong className="text-[#2563EB] font-bold text-sm">৳{grandTotal.toLocaleString()}</strong></p>
                   <p>4. Enter your Sender Number and Transaction ID below.</p>
                 </div>

@@ -1,17 +1,58 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Search, Phone, MapPin, ShoppingBag } from 'lucide-react';
+import { createClient } from '../../../lib/supabase/client';
 
 export default function AdminCustomersPage() {
   const [search, setSearch] = useState('');
+  const [customers, setCustomers] = useState<any[]>([]);
 
-  const [customers] = useState([
-    { id: '1', name: 'Saddam Hossen', phone: '01854213620', location: 'Uttara, Dhaka', total_orders: 3, total_spent: 3410, joined: '01 Aug 2026' },
-    { id: '2', name: 'Tanvir Ahmed', phone: '01712345678', location: 'GEC Circle, Chittagong', total_orders: 1, total_spent: 1550, joined: '05 Aug 2026' },
-    { id: '3', name: 'Siam Hossain', phone: '01898765432', location: 'Zindabazar, Sylhet', total_orders: 2, total_spent: 4980, joined: '08 Aug 2026' },
-    { id: '4', name: 'Rahim Uddin', phone: '01911223344', location: 'Dhanmondi, Dhaka', total_orders: 1, total_spent: 1850, joined: '10 Aug 2026' },
-  ]);
+  useEffect(() => {
+    async function loadCustomers() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const map = new Map<string, any>();
+          data.forEach((o: any) => {
+            const key = (o.customer_phone || o.customer_name || 'unknown').trim();
+            const current = map.get(key);
+            const amount = Number(o.total_amount) || Number(o.subtotal) || 0;
+            if (current) {
+              current.total_orders += 1;
+              current.total_spent += amount;
+            } else {
+              map.set(key, {
+                id: o.id?.toString() || key,
+                name: o.customer_name || 'Customer',
+                phone: o.customer_phone || 'N/A',
+                location: o.customer_address || `${o.thana || ''} ${o.district || ''}`.trim() || 'Bangladesh',
+                total_orders: 1,
+                total_spent: amount,
+                joined: o.created_at
+                  ? new Date(o.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                  : 'Recent',
+              });
+            }
+          });
+          setCustomers(Array.from(map.values()));
+        } else {
+          setCustomers([
+            { id: '1', name: 'Saddam Hossen', phone: '01854213620', location: 'Uttara, Dhaka', total_orders: 3, total_spent: 3410, joined: '01 Aug 2026' },
+            { id: '2', name: 'Tanvir Ahmed', phone: '01712345678', location: 'GEC Circle, Chittagong', total_orders: 1, total_spent: 1550, joined: '05 Aug 2026' },
+            { id: '3', name: 'Siam Hossain', phone: '01898765432', location: 'Zindabazar, Sylhet', total_orders: 2, total_spent: 4980, joined: '08 Aug 2026' },
+            { id: '4', name: 'Rahim Uddin', phone: '01911223344', location: 'Dhanmondi, Dhaka', total_orders: 1, total_spent: 1850, joined: '10 Aug 2026' },
+          ]);
+        }
+      } catch (e) {}
+    }
+    loadCustomers();
+  }, []);
 
   const filtered = customers.filter(
     (c) =>

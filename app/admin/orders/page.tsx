@@ -122,7 +122,7 @@ export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Verified' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled'>('All');
   const [search, setSearch] = useState('');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
-  const [orders, setOrders] = useState(DEFAULT_ORDERS);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
   const [activePopupOrderId, setActivePopupOrderId] = useState<string | null>(null);
@@ -130,19 +130,21 @@ export default function AdminOrdersPage() {
   const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
-      let currentOrders = [...DEFAULT_ORDERS];
+      let localOrders: any[] = [];
       if (typeof window !== 'undefined') {
         const stored = localStorage.getItem('javed_shop_orders');
         if (stored) {
           try {
             const parsed = JSON.parse(stored);
             if (Array.isArray(parsed) && parsed.length > 0) {
-              currentOrders = parsed;
+              localOrders = parsed;
             }
           } catch (e) {}
         }
       }
 
+      // Query Supabase for real orders
+      let finalOrders = localOrders;
       try {
         const supabase = createClient();
         const { data, error } = await supabase
@@ -173,17 +175,14 @@ export default function AdminOrdersPage() {
             items: d.notes || 'Store Products',
           }));
 
-          const existingNums = new Set(mapped.map((m: any) => m.order_number));
-          const leftovers = currentOrders.filter((o) => !existingNums.has(o.order_number));
-          currentOrders = [...mapped, ...leftovers];
-
+          finalOrders = mapped;
           if (typeof window !== 'undefined') {
-            localStorage.setItem('javed_shop_orders', JSON.stringify(currentOrders));
+            localStorage.setItem('javed_shop_orders', JSON.stringify(mapped));
           }
         }
       } catch (err) {}
 
-      setOrders(currentOrders);
+      setOrders(finalOrders.length > 0 ? finalOrders : DEFAULT_ORDERS);
       setLastRefreshed(
         new Date().toLocaleTimeString('en-US', {
           hour: '2-digit',
@@ -198,6 +197,28 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     loadOrders();
+
+    // Supabase Realtime channel for instant order reception
+    let channel: any = null;
+    try {
+      const supabase = createClient();
+      channel = supabase
+        .channel('realtime:orders')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'orders' },
+          () => {
+            loadOrders();
+          }
+        )
+        .subscribe();
+    } catch (e) {}
+
+    return () => {
+      if (channel) {
+        channel.unsubscribe();
+      }
+    };
   }, [loadOrders]);
 
   const updateOrderStatus = async (id: string, newStatus: string, orderNumber: string) => {

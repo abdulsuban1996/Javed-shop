@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, TrendingUp, TrendingDown, Plus, CreditCard, ArrowUpRight } from 'lucide-react';
+import { createClient } from '../../../lib/supabase/client';
 
 export default function AdminFinancePage() {
   const [expenses, setExpenses] = useState([
@@ -14,8 +15,36 @@ export default function AdminFinancePage() {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Marketing');
+  const [totalRevenue, setTotalRevenue] = useState(45800);
 
-  const totalRevenue = 45800;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedExpenses = localStorage.getItem('javed_shop_expenses');
+      if (savedExpenses) {
+        try {
+          const parsed = JSON.parse(savedExpenses);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setExpenses(parsed);
+          }
+        } catch (e) {}
+      }
+    }
+
+    async function fetchRevenue() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase.from('orders').select('total_amount, subtotal, order_status');
+        if (!error && data && data.length > 0) {
+          const sum = data
+            .filter((o: any) => o.order_status !== 'cancelled')
+            .reduce((acc: number, o: any) => acc + (Number(o.total_amount) || Number(o.subtotal) || 0), 0);
+          setTotalRevenue(sum > 0 ? sum : 45800);
+        }
+      } catch (e) {}
+    }
+    fetchRevenue();
+  }, []);
+
   const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
   const netProfit = totalRevenue - totalExpenses;
 
@@ -23,7 +52,7 @@ export default function AdminFinancePage() {
     e.preventDefault();
     if (!title || !amount) return;
 
-    setExpenses([
+    const updated = [
       {
         id: Date.now().toString(),
         title,
@@ -32,7 +61,11 @@ export default function AdminFinancePage() {
         date: 'Today',
       },
       ...expenses,
-    ]);
+    ];
+    setExpenses(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('javed_shop_expenses', JSON.stringify(updated));
+    }
     setTitle('');
     setAmount('');
   };
