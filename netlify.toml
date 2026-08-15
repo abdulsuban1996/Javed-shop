@@ -4,6 +4,7 @@
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "false"
+  DEPLOY_ID = "20260815-v5-cache-bust"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
