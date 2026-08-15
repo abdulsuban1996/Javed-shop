@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Search, Filter, CheckCircle2, Clock, Truck, XCircle, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, Search, CheckCircle2, Clock, Truck, XCircle, RefreshCw, Check, AlertCircle } from 'lucide-react';
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState<'All' | 'Pending' | 'Verified' | 'Shipped' | 'Delivered' | 'Cancelled'>('All');
   const [search, setSearch] = useState('');
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   const [orders, setOrders] = useState([
     {
@@ -63,10 +64,14 @@ export default function AdminOrdersPage() {
     },
   ]);
 
-  const updateOrderStatus = (id: string, newStatus: string) => {
+  const updateOrderStatus = (id: string, newStatus: string, orderNumber: string) => {
     setOrders((prev) =>
       prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
     );
+    setActionNotice(`Order #${orderNumber} marked as ${newStatus}`);
+    setTimeout(() => {
+      setActionNotice(null);
+    }, 3000);
   };
 
   const filteredOrders = orders.filter((o) => {
@@ -87,13 +92,13 @@ export default function AdminOrdersPage() {
     <div className="max-w-7xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E7EB] pb-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-            <ShoppingBag className="w-7 h-7 text-purple-600" />
+          <h1 className="text-2xl font-extrabold text-[#0B1220] flex items-center gap-2">
+            <ShoppingBag className="w-7 h-7 text-[#2563EB]" />
             <span>Orders Management</span>
           </h1>
-          <p className="text-xs text-slate-500 font-medium">Verify TrxIDs & track Bangladeshi customer deliveries</p>
+          <p className="text-xs text-slate-500 font-medium">Verify payments, manage order status &amp; process cancellations</p>
         </div>
 
         {/* Search Bar */}
@@ -103,117 +108,182 @@ export default function AdminOrdersPage() {
             placeholder="Search Order #, Phone, Name, TrxID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-72 bg-white text-slate-900 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-slate-200 focus:outline-none focus:border-purple-600 shadow-sm"
+            className="w-full sm:w-72 bg-white text-slate-900 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-[#E5E7EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] shadow-sm"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3" />
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3 text-xs font-extrabold">
-        {(['All', 'Pending', 'Verified', 'Shipped', 'Delivered', 'Cancelled'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-xl transition ${
-              activeTab === tab
-                ? 'bg-[#312356] text-white shadow-md'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-            }`}
+      {/* Action Notification */}
+      <AnimatePresence>
+        {actionNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-sm"
           >
-            {tab} ({tab === 'All' ? orders.length : orders.filter((o) => o.status === tab).length})
-          </button>
-        ))}
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{actionNotice}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap gap-2 border-b border-[#E5E7EB] pb-3 text-xs font-extrabold">
+        {(['All', 'Pending', 'Verified', 'Shipped', 'Delivered', 'Cancelled'] as const).map((tab) => {
+          const count = tab === 'All' ? orders.length : orders.filter((o) => o.status === tab).length;
+          const isActive = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-xl transition flex items-center gap-1.5 ${
+                isActive
+                  ? 'bg-[#0B1220] text-white shadow-sm'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 border border-[#E5E7EB]'
+              }`}
+            >
+              <span>{tab}</span>
+              <span className={`text-[11px] px-1.5 py-0.2 rounded-full ${
+                isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/60 border border-slate-100 space-y-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="text-slate-400 font-extrabold border-b border-slate-100 uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-3">ORDER #</th>
-                <th className="py-3 px-3">CUSTOMER & ADDRESS</th>
-                <th className="py-3 px-3">ITEMS</th>
-                <th className="py-3 px-3">AMOUNT</th>
-                <th className="py-3 px-3">PAYMENT / TRXID</th>
-                <th className="py-3 px-3">STATUS</th>
-                <th className="py-3 px-3 text-right">ACTION</th>
+              <tr className="bg-[#F8FAFC] text-slate-500 font-extrabold border-b border-[#E5E7EB] uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4">ORDER #</th>
+                <th className="py-3.5 px-4">CUSTOMER &amp; ADDRESS</th>
+                <th className="py-3.5 px-4">ITEMS</th>
+                <th className="py-3.5 px-4">AMOUNT</th>
+                <th className="py-3.5 px-4">PAYMENT / TRXID</th>
+                <th className="py-3.5 px-4">STATUS</th>
+                <th className="py-3.5 px-4 text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#F1F5F9]">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400 font-medium">
-                    No orders found matching status filter.
+                  <td colSpan={7} className="py-12 text-center text-slate-400 font-medium">
+                    No orders found matching filter.
                   </td>
                 </tr>
               ) : (
                 filteredOrders.map((o) => (
-                  <tr key={o.id} className="hover:bg-slate-50 transition">
-                    <td className="py-4 px-3 font-bold text-purple-700 font-mono">
+                  <tr key={o.id} className="hover:bg-slate-50/80 transition">
+                    <td className="py-4 px-4 font-bold text-[#2563EB] font-mono">
                       <div>{o.order_number}</div>
                       <div className="text-[10px] text-slate-400 font-normal">{o.date}</div>
                     </td>
 
-                    <td className="py-4 px-3 font-bold text-slate-900 max-w-xs">
+                    <td className="py-4 px-4 font-bold text-slate-900 max-w-xs">
                       <div>{o.customer_name}</div>
-                      <div className="text-[11px] text-purple-600 font-semibold">{o.phone}</div>
+                      <div className="text-[11px] text-[#2563EB] font-semibold">{o.phone}</div>
                       <div className="text-[10px] text-slate-400 font-normal truncate">{o.address}</div>
                     </td>
 
-                    <td className="py-4 px-3 text-slate-700 font-medium">
+                    <td className="py-4 px-4 text-slate-700 font-medium">
                       {o.items}
                     </td>
 
-                    <td className="py-4 px-3 font-black text-emerald-600">
+                    <td className="py-4 px-4 font-extrabold text-[#0B1220]">
                       ৳{o.amount.toLocaleString()}
                     </td>
 
-                    <td className="py-4 px-3">
-                      <span className="bg-emerald-100 text-emerald-800 font-extrabold px-2.5 py-1 rounded-full text-[11px] block w-max mb-1">
+                    <td className="py-4 px-4">
+                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold px-2.5 py-0.5 rounded-md text-[11px] inline-block mb-1">
                         {o.payment_method}
                       </span>
-                      <code className="text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
-                        {o.trx_id}
-                      </code>
+                      <div>
+                        <code className="text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
+                          {o.trx_id}
+                        </code>
+                      </div>
                     </td>
 
-                    <td className="py-4 px-3">
-                      <span className={`font-extrabold px-3 py-1 rounded-full text-[11px] inline-block ${
-                        o.status === 'Delivered' ? 'bg-emerald-100 text-emerald-700' :
-                        o.status === 'Verified' ? 'bg-blue-100 text-blue-700' :
-                        o.status === 'Shipped' ? 'bg-orange-100 text-orange-700' : 'bg-amber-100 text-amber-700'
+                    <td className="py-4 px-4">
+                      <span className={`font-extrabold px-3 py-1 rounded-full text-[11px] inline-block border ${
+                        o.status === 'Delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                        o.status === 'Verified' ? 'bg-blue-50 text-[#2563EB] border-blue-200' :
+                        o.status === 'Shipped' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                        o.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                        'bg-slate-100 text-slate-700 border-slate-200'
                       }`}>
                         {o.status}
                       </span>
                     </td>
 
-                    <td className="py-4 px-3 text-right space-x-1">
-                      {o.status === 'Pending' && (
-                        <button
-                          onClick={() => updateOrderStatus(o.id, 'Verified')}
-                          className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition"
-                        >
-                          Approve
-                        </button>
-                      )}
-                      {o.status === 'Verified' && (
-                        <button
-                          onClick={() => updateOrderStatus(o.id, 'Shipped')}
-                          className="px-3 py-1 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-sm transition"
-                        >
-                          Ship
-                        </button>
-                      )}
-                      {o.status === 'Shipped' && (
-                        <button
-                          onClick={() => updateOrderStatus(o.id, 'Delivered')}
-                          className="px-3 py-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition"
-                        >
-                          Complete
-                        </button>
-                      )}
+                    <td className="py-4 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                        {/* Status Progression Buttons */}
+                        {o.status === 'Pending' && (
+                          <button
+                            onClick={() => updateOrderStatus(o.id, 'Verified', o.order_number)}
+                            className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1"
+                            title="Approve & Verify Order"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Approve</span>
+                          </button>
+                        )}
+                        {o.status === 'Verified' && (
+                          <button
+                            onClick={() => updateOrderStatus(o.id, 'Shipped', o.order_number)}
+                            className="px-3 py-1 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs shadow-sm transition flex items-center gap-1"
+                            title="Mark Order as Shipped"
+                          >
+                            <Truck className="w-3.5 h-3.5" />
+                            <span>Ship</span>
+                          </button>
+                        )}
+                        {o.status === 'Shipped' && (
+                          <button
+                            onClick={() => updateOrderStatus(o.id, 'Delivered', o.order_number)}
+                            className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1"
+                            title="Mark Order as Delivered"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Deliver</span>
+                          </button>
+                        )}
+
+                        {/* Cancel Button (For active orders) */}
+                        {o.status !== 'Cancelled' && o.status !== 'Delivered' && (
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to cancel order ${o.order_number}?`)) {
+                                updateOrderStatus(o.id, 'Cancelled', o.order_number);
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 hover:border-rose-300 font-bold text-xs transition flex items-center gap-1 shadow-sm"
+                            title="Cancel this order"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span>Cancel</span>
+                          </button>
+                        )}
+
+                        {/* Restore Button (For cancelled orders) */}
+                        {o.status === 'Cancelled' && (
+                          <button
+                            onClick={() => updateOrderStatus(o.id, 'Pending', o.order_number)}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs transition flex items-center gap-1"
+                            title="Restore order to Pending"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Restore</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -226,3 +296,4 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
+
