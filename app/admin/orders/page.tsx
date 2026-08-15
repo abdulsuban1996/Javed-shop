@@ -92,9 +92,8 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
   
-  // Selected Order for Fixed Modal Action Box
-  const [selectedOrderForAction, setSelectedOrderForAction] = useState<OrderRecord | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  // Selected Order for updating tracking
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   // 1. Fetch Orders directly from Supabase
   const loadOrders = useCallback(async () => {
@@ -209,7 +208,7 @@ export default function AdminOrdersPage() {
 
   // 3. Update Order Status in Supabase & Local State
   const handleUpdateOrderStatus = async (order: OrderRecord, newStatus: OrderRecord['status']) => {
-    setUpdatingStatus(true);
+    setUpdatingOrderId(order.id);
     const dbStatus = newStatus.toLowerCase();
 
     // Optimistic local update
@@ -233,14 +232,13 @@ export default function AdminOrdersPage() {
         console.error('Failed to update status in Supabase:', error);
         setActionNotice({ type: 'error', message: `Database update failed: ${error.message}` });
       } else {
-        setActionNotice({ type: 'success', message: `Order #${order.order_number} marked as "${newStatus}"` });
+        setActionNotice({ type: 'success', message: `Order #${order.order_number} status updated to "${newStatus}"` });
       }
     } catch (err: any) {
       console.error('Update status exception:', err);
       setActionNotice({ type: 'error', message: `Error updating status: ${err?.message || 'Unknown error'}` });
     } finally {
-      setUpdatingStatus(false);
-      setSelectedOrderForAction(null);
+      setUpdatingOrderId(null);
       setTimeout(() => setActionNotice(null), 4000);
     }
   };
@@ -385,6 +383,7 @@ export default function AdminOrdersPage() {
                 filteredOrders.map((o) => {
                   const statusCfg = STATUS_CONFIG[o.status] || STATUS_CONFIG.Pending;
                   const StatusIcon = statusCfg.icon;
+                  const isUpdating = updatingOrderId === o.id;
 
                   return (
                     <tr key={o.id} className="hover:bg-slate-50/80 transition">
@@ -441,16 +440,44 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
 
-                      {/* Action Button */}
+                      {/* Action: Inline <select> Dropdown Element */}
                       <td className="py-4 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedOrderForAction(o)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs shadow-sm transition active:scale-95"
-                        >
-                          <span>Change Status</span>
-                          <ChevronDown className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="inline-flex items-center gap-2">
+                          {isUpdating && (
+                            <RotateCw className="w-3.5 h-3.5 text-[#2563EB] animate-spin shrink-0" />
+                          )}
+                          <select
+                            disabled={isUpdating}
+                            value={o.status}
+                            onChange={(e) => {
+                              const val = e.target.value as OrderRecord['status'];
+                              if (val !== o.status) {
+                                if (val === 'Cancelled') {
+                                  if (window.confirm(`Are you sure you want to cancel order ${o.order_number}?`)) {
+                                    handleUpdateOrderStatus(o, val);
+                                  }
+                                } else {
+                                  handleUpdateOrderStatus(o, val);
+                                }
+                              }
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition cursor-pointer outline-none shadow-sm ${
+                              o.status === 'Delivered' ? 'bg-emerald-50 text-emerald-700 border-emerald-300 focus:ring-2 focus:ring-emerald-500/20' :
+                              o.status === 'Verified' ? 'bg-blue-50 text-[#2563EB] border-blue-300 focus:ring-2 focus:ring-blue-500/20' :
+                              o.status === 'Processing' ? 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-2 focus:ring-purple-500/20' :
+                              o.status === 'Shipped' ? 'bg-indigo-50 text-indigo-700 border-indigo-300 focus:ring-2 focus:ring-indigo-500/20' :
+                              o.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-2 focus:ring-rose-500/20' :
+                              'bg-amber-50 text-amber-800 border-amber-300 focus:ring-2 focus:ring-amber-500/20'
+                            }`}
+                          >
+                            <option value="Pending" className="bg-white text-slate-800 font-semibold">🕒 Pending</option>
+                            <option value="Verified" className="bg-white text-slate-800 font-semibold">🔵 Approve / Verified</option>
+                            <option value="Processing" className="bg-white text-slate-800 font-semibold">🟣 Processing</option>
+                            <option value="Shipped" className="bg-white text-slate-800 font-semibold">🚚 Shipped</option>
+                            <option value="Delivered" className="bg-white text-slate-800 font-semibold">✅ Delivered</option>
+                            <option value="Cancelled" className="bg-white text-rose-600 font-bold">❌ Cancel Order</option>
+                          </select>
+                        </div>
                       </td>
 
                     </tr>
@@ -462,103 +489,7 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* ─── FIXED OVERLAY MODAL POPUP FOR STATUS ACTION ─────────────────── */}
-      <AnimatePresence>
-        {selectedOrderForAction && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
-              onClick={() => setSelectedOrderForAction(null)}
-            />
-
-            {/* Modal Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 10 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden z-10 p-6 space-y-5"
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-base font-extrabold text-[#0B1220] flex items-center gap-2">
-                    <ShoppingBag className="w-5 h-5 text-[#2563EB]" />
-                    <span>Update Order #{selectedOrderForAction.order_number}</span>
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">Select new status to persist in Supabase cloud</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedOrderForAction(null)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Order Info Banner */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
-                <div className="flex justify-between font-bold text-slate-800">
-                  <span>{selectedOrderForAction.customer_name} ({selectedOrderForAction.phone})</span>
-                  <span className="text-[#2563EB] font-mono">৳{selectedOrderForAction.amount.toLocaleString()}</span>
-                </div>
-                <div className="text-[11px] text-slate-500 truncate">{selectedOrderForAction.address}</div>
-              </div>
-
-              {/* Status Options Grid */}
-              <div className="space-y-2">
-                <label className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
-                  Select Order Status:
-                </label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {ALL_STATUSES.map((st) => {
-                    const cfg = STATUS_CONFIG[st];
-                    const Icon = cfg.icon;
-                    const isCurrent = selectedOrderForAction.status === st;
-
-                    return (
-                      <button
-                        key={st}
-                        type="button"
-                        disabled={updatingStatus}
-                        onClick={() => handleUpdateOrderStatus(selectedOrderForAction, st)}
-                        className={`flex items-center gap-2.5 px-3.5 py-3 rounded-2xl text-xs font-bold transition border text-left ${
-                          isCurrent
-                            ? `${cfg.bg} ${cfg.color} ${cfg.border} ring-2 ring-offset-1 ring-[#2563EB]/40 shadow-sm`
-                            : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 shrink-0 ${isCurrent ? cfg.color : 'text-slate-400'}`} />
-                        <span className="flex-1">{st}</span>
-                        {isCurrent && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="pt-2 border-t border-slate-100 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setSelectedOrderForAction(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
-                >
-                  Close
-                </button>
-              </div>
-
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
     </div>
   );
 }
+
