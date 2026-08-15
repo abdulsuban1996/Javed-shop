@@ -106,6 +106,10 @@ export default function AdminOrdersPage() {
         .select('*')
         .order('created_at', { ascending: false });
 
+      console.log('=== ADMIN ORDERS SUPABASE FETCH DIAGNOSTIC ===');
+      console.log('[Supabase Query Data]:', data);
+      console.log('[Supabase Query Error]:', error);
+
       if (error) {
         console.error('Supabase query error:', error);
       }
