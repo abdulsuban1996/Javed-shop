@@ -15,7 +15,6 @@ import {
   Settings, 
   LogOut,
   Eye,
-  ExternalLink,
   Menu,
   X
 } from 'lucide-react';
@@ -193,17 +192,16 @@ export default function AdminLayout({
             </div>
           </div>
 
-          {/* Right Corner: View Website Button (Electric Blue) */}
+          {/* Right Corner: View Website Button (Eye Icon Only) */}
           <Link
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-[#EFF6FF] text-[#2563EB] hover:bg-[#2563EB] hover:text-white font-bold text-xs border border-[#2563EB]/20 transition shadow-sm group"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#2563EB] hover:bg-[#2563EB] hover:text-white border border-[#2563EB]/20 transition shadow-sm group"
             title="View Live Storefront Website"
+            aria-label="View Live Storefront Website"
           >
-            <Eye className="w-4 h-4 group-hover:scale-105 transition" />
-            <span className="hidden sm:inline">View Website</span>
-            <ExternalLink className="w-3 h-3 opacity-60" />
+            <Eye className="w-4 h-4 group-hover:scale-110 transition duration-150" />
           </Link>
 
         </header>
