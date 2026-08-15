@@ -66,12 +66,12 @@ export default function Footer() {
           {/* Col 1 — Brand */}
           <div className="space-y-3.5">
             <Link href="/" className="inline-block group">
-              <div className="bg-white px-3 py-1.5 rounded-xl inline-flex items-center shadow-sm">
+              <div className="bg-white px-4 py-2 rounded-xl inline-flex items-center shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={logoSrc}
                   alt={settings.storeName || 'JAVED SHOP'}
-                  className="h-7 sm:h-8 w-auto object-contain"
+                  className="h-10 sm:h-12 w-auto object-contain"
                 />
               </div>
             </Link>
