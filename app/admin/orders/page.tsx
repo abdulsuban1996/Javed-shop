@@ -388,22 +388,22 @@ export default function AdminOrdersPage() {
                       </td>
 
                       {/* Action Dropdown / Popup Box */}
-                      <td className="py-4 px-4 text-right relative">
-                        <div className="inline-block text-left">
+                      <td className="py-4 px-4 text-right">
+                        <div className="relative inline-block text-left">
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setActivePopupOrderId(isPopupOpen ? null : o.id);
                             }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs shadow-sm transition border ${
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs shadow-sm transition border ${
                               isPopupOpen
                                 ? 'bg-[#0B1220] text-white border-[#0B1220]'
-                                : 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#2563EB] hover:text-white border-[#2563EB]/20'
+                                : 'bg-[#EFF6FF] text-[#2563EB] hover:bg-[#2563EB] hover:text-white border-[#2563EB]/25'
                             }`}
                           >
-                            <span>Action</span>
-                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isPopupOpen ? 'rotate-180' : ''}`} />
+                            <span>Change Status</span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isPopupOpen ? 'rotate-180' : ''}`} />
                           </button>
 
                           {/* Popup Menu Card */}
@@ -412,7 +412,7 @@ export default function AdminOrdersPage() {
                               <>
                                 {/* Click-away Backdrop */}
                                 <div
-                                  className="fixed inset-0 z-40"
+                                  className="fixed inset-0 z-[80]"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setActivePopupOrderId(null);
@@ -420,20 +420,21 @@ export default function AdminOrdersPage() {
                                 />
 
                                 <motion.div
-                                  initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                                  initial={{ opacity: 0, scale: 0.95, y: 4 }}
                                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                                  exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                                  transition={{ duration: 0.12 }}
-                                  className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 z-50 text-left"
+                                  exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                                  transition={{ duration: 0.1 }}
+                                  className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-slate-200 p-2.5 z-[99] text-left"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between mb-1">
-                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-                                      Update Order Status
+                                  <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between mb-1.5">
+                                    <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
+                                      Select Order Status
                                     </span>
                                     <button
+                                      type="button"
                                       onClick={() => setActivePopupOrderId(null)}
-                                      className="text-slate-400 hover:text-slate-600 p-0.5 rounded-md"
+                                      className="text-slate-400 hover:text-slate-600 p-1 rounded-md"
                                     >
                                       <X className="w-3.5 h-3.5" />
                                     </button>
